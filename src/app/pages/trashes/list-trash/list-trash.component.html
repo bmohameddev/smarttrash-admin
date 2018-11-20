@@ -1,0 +1,356 @@
+<div fxLayout="column">
+	<div class="flex-p">
+		<div fxLayout="row" fxLayoutAlign="space-between center" class="mb-075">
+			<form [formGroup]="searchForm" fxFlex fxLayout="row" fxLayoutAlign="start
+				center">
+				<mat-form-field class="custom-form-field pb0-form-filed mr-05"
+					appearance="outline">
+					<mat-label> 请输入设备ID或地址&nbsp;&nbsp;&nbsp; </mat-label>
+					<button mat-icon-button matSuffix (click)="applySearch()">
+						<mat-icon>search</mat-icon>
+					</button>
+					<input matInput formControlName="keyword" (change)="applySearch()">
+				</mat-form-field>
+			</form>
+			<div
+				*ngIf="commonData.city.topAdmin == user.id || user.role == 'SUPER'"
+				fxLayout="row" fxLayoutAlign="space-between center">
+				<button mat-stroked-button color="primary" class="list-top-btn"
+					(click)="export('xlsx')">
+					<span>导 出</span>
+				</button>
+				<button mat-stroked-button color="primary" class="list-top-btn"
+					(click)="print()">
+					<span>打 印</span>
+				</button>
+				<button mat-stroked-button color="primary" class="list-top-btn"
+					(click)="openTrashDialog()">添加设备</button>
+				<button mat-stroked-button color="warn" class="list-top-btn"
+					(click)="deleteTrashes()">
+					删除
+				</button>
+			</div>
+		</div>
+		<table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows
+			class="mat-elevation-z8 w-100"
+			(matSortChange)="customSort($event)">
+			<ng-container matColumnDef="select">
+				<th mat-header-cell *matHeaderCellDef>
+					<mat-checkbox (change)="$event ? masterToggle() : null"
+						[checked]="selection.hasValue() && isAllSelected()"
+						[indeterminate]="selection.hasValue() && !isAllSelected()">
+					</mat-checkbox>
+				</th>
+				<td mat-cell *matCellDef="let row">
+					<mat-checkbox (click)="$event.stopPropagation()" (change)="$event ?
+						selection.toggle(row) : null"
+						[checked]="selection.isSelected(row)">
+					</mat-checkbox>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef> No </th>
+				<td mat-cell *matCellDef="let element;"> {{element.index + 1}}</td>
+			</ng-container>
+			<ng-container matColumnDef="deviceId">
+				<th mat-header-cell *matHeaderCellDef> 设备ID </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.deviceId}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="location">
+				<th mat-header-cell *matHeaderCellDef> 位置 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.lat? element.lat: ''}}&nbsp;&nbsp;&nbsp;{{element.lng?
+					element.lng: ''}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="city">
+				<th mat-header-cell *matHeaderCellDef> 城市 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.city? element.city.name : ''}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="address">
+				<th mat-header-cell *matHeaderCellDef> 详细地址 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.address? element.address: ''}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="totalPoint">
+				<th mat-header-cell *matHeaderCellDef> 积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.totalPoint | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="createdAt">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> 创建时间 </th>
+				<td mat-cell *matCellDef="let element"> {{element.createdAt |
+					date:"yyyy.MM.dd - HH:mm:ss"}} </td>
+			</ng-container>
+			<ng-container matColumnDef="topAdmin">
+				<th mat-header-cell *matHeaderCellDef> 地区总管理员 </th>
+				<td mat-cell *matCellDef="let element">
+					<mat-chip-list>
+						<mat-chip
+							*ngIf="element.city.topAdmin"
+							class="mat-admin-chip"
+							color="accent"
+							selected="true">
+							<img [defaultImage]="'assets/img/extra/user.svg'"
+								[lazyLoad]="element.city.topAdmin?.profilePicture? serverUrl+'/' +
+								element.city.topAdmin.profilePicture: ''">
+							<span>{{element.city.topAdmin?.name}}</span>
+						</mat-chip>
+					</mat-chip-list>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="topAdminPhone">
+				<th mat-header-cell *matHeaderCellDef> 电话号码 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.city.topAdmin?.phone}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="state">
+				<th mat-header-cell *matHeaderCellDef>
+					<div fxLayout="row" fxLayoutAlign="center center"> 状态 </div>
+				</th>
+				<td mat-cell *matCellDef="let element">
+					<div fxLayout="row" fxLayoutAlign="center center">
+						<mat-icon color="{{element.online? 'primary' : 'warn'}}">
+							{{element.online? 'wifi' : 'wifi_off'}}
+						</mat-icon>
+					</div>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="warn">
+				<th mat-header-cell *matHeaderCellDef>
+					<div fxLayout="row" fxLayoutAlign="center center"> 报警 </div>
+				</th>
+				<td mat-cell *matCellDef="let element">
+					<div fxLayout="row" fxLayoutAlign="center center">
+						<mat-icon *ngIf="element.voltageState || element.levelState ||
+							element.dustHeight1State || element.dustHeight2State
+							|| element.dustHeight3State || element.dustHeight4State else ok;"
+							color="warn">
+							error
+						</mat-icon>
+						<ng-template #ok>
+							<mat-icon color="primary">
+								face
+							</mat-icon>
+						</ng-template>
+
+					</div>
+				</td>
+			</ng-container>
+			<!-- <ng-container matColumnDef="state">
+				<th mat-header-cell *matHeaderCellDef> 状态 </th>
+				<td mat-cell *matCellDef="let element"> 
+					<mat-chip-list>
+						<mat-chip 
+							*ngIf="element.online" 
+							class="mat-small-chip"
+							color="primary" 
+							selected="true">
+							线上
+						</mat-chip>
+						<mat-chip 
+							*ngIf="!element.online" 
+							class="mat-small-chip"
+							color="warn" 
+							selected="true">
+							离线
+						</mat-chip>
+					</mat-chip-list>
+				</td>
+			</ng-container> -->
+			<ng-container matColumnDef="menu">
+				<th mat-header-cell *matHeaderCellDef class="text-center"> 操作 </th>
+				<td mat-cell *matCellDef="let element" class="text-center">
+					<ng-container *ngIf="commonData.city.topAdmin == user.id || user.role ==
+						'SUPER'">
+						<button
+							mat-icon-button [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger"
+							(click)="$event.stopPropagation()">
+							<mat-icon>more_vert</mat-icon>
+						</button>
+						<mat-menu #menu="matMenu" xPosition="before" overlapTrigger="true">
+							<span (mouseleave)="menuTrigger.closeMenu()">
+								<button mat-menu-item (click)="openTrashDialog(element);">
+									<mat-icon>edit</mat-icon>
+									<span>编辑</span>
+								</button>
+								<button mat-menu-item routerLink="/trashes/detail/{{element.id}}">
+									<mat-icon>reorder</mat-icon>
+									<span>详细信息</span>
+								</button>
+								<button mat-menu-item color="warn" (click)="deleteTrash($event,
+									element.id)">
+									<mat-icon>delete</mat-icon>
+									<span>删除</span>
+								</button>
+							</span>
+						</mat-menu>
+					</ng-container>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="expandedDetail">
+				<td mat-cell *matCellDef="let element"
+					[attr.colspan]="displayedColumns.length">
+					<div class="example-element-detail"
+						[@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+						<div fxLayout="row wrap" class="flex-p">
+							<div class="flex-p" fxFlex="100" fxFlex.gt-sm="20" fxLayout="column">
+								<h3 class="mb-05 accent">今天记录</h3>
+								<p class="trash-detail">
+									<span>总开门数</span>
+									<span>{{element.today.operationCnt}}</span>
+								</p>
+								<p class="trash-detail">
+									<span>{{dustAName}}开门数</span>
+									<span>{{element.today.operationCntA}}</span>
+								</p>
+								<p class="trash-detail">
+									<span>{{dustBName}}开门数</span>
+									<span>{{element.today.operationCntB}}</span>
+								</p>
+							</div>
+							<div class="flex-p" fxFlex="100" fxFlex.gt-sm="20" fxLayout="column">
+								<h3 class="mb-05 accent">设备状态</h3>
+								<p class="trash-detail">
+									<span>电压</span>
+									<span>
+										<span *ngIf="element.voltageState == 'warn'" class="warn">
+											告警
+										</span>
+										<span *ngIf="element.voltageState == 'error'" class="red">
+											错误
+										</span>
+										{{(element.voltage? element.voltage : 0) |
+										currency:'USD':'':'1.1-1'}}V
+									</span>
+								</p>
+								<p class="trash-detail">
+									<span>水位</span>
+									<span>
+										<span *ngIf="element.levelState == 'warn'" class="warn">
+											告警
+										</span>
+										{{element.level? element.level : 0}}mm
+									</span>
+								</p>
+								<p class="trash-detail">
+									<span>温度</span>
+									<span>
+										<span *ngIf="element.temperatureState == 'warn'" class="warn">
+											告警
+										</span>
+										{{(element.temperature? element.temperature : 0) |
+										currency:'USD':'':'1.1-1'}}°C
+									</span>
+								</p>
+								<p class="trash-detail">
+									<span>{{element.dust1Name? element.dust1Name : '垃圾1'}}高度</span>
+									<span>
+										<span *ngIf="element.dustHeight1State == 'error'" class="red">
+											错误
+										</span>
+										{{(element.dustHeight1? element.dustHeight1 : 0) |
+										currency:'USD':'':'1.0-0'}}mm
+									</span>
+								</p>
+								<p class="trash-detail">
+									<span>{{element.dust2Name? element.dust2Name : '垃圾2'}}高度</span>
+									<span>
+										<span *ngIf="element.dustHeight2State == 'error'" class="red">
+											错误
+										</span>
+										{{(element.dustHeight2? element.dustHeight2 : 0) |
+										currency:'USD':'':'1.0-0'}}mm
+									</span>
+								</p>
+								<p class="trash-detail">
+									<span>{{element.dust3Name? element.dust3Name : '垃圾3'}}高度</span>
+									<span>
+										<span *ngIf="element.dustHeight3State == 'error'" class="red">
+											错误
+										</span>
+										{{(element.dustHeight3? element.dustHeight3 : 0) |
+										currency:'USD':'':'1.0-0'}}mm
+									</span>
+								</p>
+								<p class="trash-detail">
+									<span>{{element.dust4Name? element.dust4Name : '垃圾4'}}高度</span>
+									<span>
+										<span *ngIf="element.dustHeight4State == 'error'" class="red">
+											错误
+										</span>
+										{{(element.dustHeight4? element.dustHeight4 : 0) |
+										currency:'USD':'':'1.0-0'}}mm
+									</span>
+								</p>
+							</div>
+							<div class="flex-p" fxFlex="100" fxFlex.gt-sm="20" fxLayout="column">
+								<h3 class="mb-05 accent">设备变量</h3>
+								<div class="trash-detail" fxLayout="row" fxLayoutAlign="start center">
+									<span>音量</span>
+									<mat-slider class="custom-slider"
+										[disabled]="false"
+										[invert]="false"
+										[max]="100"
+										[min]="0"
+										[step]="1"
+										[thumbLabel]="true"
+										[tickInterval]="1"
+										[(ngModel)]="element.volume"
+										(change)="saveVolume(element)"
+										[vertical]="false">
+									</mat-slider>
+								</div>
+								<p class="trash-detail">
+									<span>电压极限</span>
+									<span>
+										{{element.voltageType? element.voltageType : '12V'}}
+									</span>
+								</p>
+								<p class="trash-detail">
+									<span>水位极限</span>
+									<span>{{(element.levelLimit? element.levelLimit : 0) |
+										currency:'USD':'':'1.0-0'}}mm</span>
+								</p>
+								<p class="trash-detail">
+									<span>垃圾桶高度</span>
+									<span>{{(element.trashHeight? element.trashHeight : 0) |
+										currency:'USD':'':'1.0-0'}}mm</span>
+								</p>
+								<p class="trash-detail">
+									<span>垃圾桶余量</span>
+									<span>{{(element.trashMargin? element.trashMargin : 0) |
+										currency:'USD':'':'1.0-0'}}mm</span>
+								</p>
+							</div>
+						</div>
+					</div>
+				</td>
+			</ng-container>
+			<tr mat-header-row *matHeaderRowDef="commonService.isMediaActive('gt-xs')?
+				displayedColumns: displayedColumnsMobile"></tr>
+			<tr mat-row
+				*matRowDef="let element; columns: commonService.isMediaActive('gt-xs')?
+				displayedColumns: displayedColumnsMobile;"
+				class="example-element-row"
+				[class.example-expanded-row]="expandedElement === element"
+				(click)="expandedElement= expandedElement === element ? null : element"
+				[style.background]="(element.index % 2)? '#F0F0F0' : ''">
+			</tr>
+			<tr mat-row *matRowDef="let row; columns: ['expandedDetail']"
+				class="example-detail-row"></tr>
+		</table>
+		<mat-paginator #paginator [pageSize]="10" [length]="totalCnt"
+			[pageIndex]="pageIndex"
+			[pageSizeOptions]="[10, 20, 50, 100]" [showFirstLastButtons]="true"
+			(page)="getTrashes($event)">
+		</mat-paginator>
+	</div>
+</div>

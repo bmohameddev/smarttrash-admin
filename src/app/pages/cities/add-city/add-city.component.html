@@ -1,0 +1,49 @@
+<form [formGroup]="form" (ngSubmit)="submitForm()" autocomplete="off" novalidate>
+    <div class="p-1" fxLayoutAlign="space-between center">
+        <h1 mat-dialog-title class="m-0">{{data? '编辑' : '添加'}}城市</h1>
+        <button mat-icon-button mat-dialog-close tabindex="-1">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <div fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutAlign="space-between space-between"
+            class="form-field-outer">
+            <mat-form-field fxFlex="100">
+                <input matInput formControlName="name" placeholder="城市名称">
+                <mat-error *ngIf="form.controls.name.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field class="w-100">
+                <mat-label> 地区管理员 </mat-label>
+                <mat-chip-list #chipList>
+                    <mat-chip *ngFor="let admin of admins; let i = index;" [selectable]="true" [removable]="true">
+                        {{ admin }}
+                        <mat-icon matChipRemove (click)="removeAdmin(i)"> cancel </mat-icon>
+                    </mat-chip>
+                    <input matInput type="text" formControlName="admin" [matChipInputFor]="chipList" #inputForAdmin
+                        [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="true"
+                        (matChipInputTokenEnd)="addAdmin()" [matAutocomplete]="autoAdmin">
+                    <mat-error *ngIf="showAdminValidation && !admins.length"> 必须填写 </mat-error>
+                    <mat-autocomplete (optionSelected)="addAdmin();" 
+                        #autoAdmin="matAutocomplete">
+                        <mat-option *ngFor="let admin of autocompleteAdmins" [value]="admin.name"> 
+                            {{ admin.name }} 
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-chip-list>
+                <mat-hint align="end"> 选择地区管理员 </mat-hint>
+            </mat-form-field>
+            <mat-form-field class="w-100">
+                <mat-select placeholder="地区总管理员" formControlName="topAdmin">
+                    <mat-option *ngFor="let topAdmin of admins" [value]="topAdmin"> {{ topAdmin }} </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form.controls.topAdmin.errors?.required"> 必须填写 </mat-error>
+                <mat-hint align="end"> 选择地区总管理员 </mat-hint>
+            </mat-form-field> 
+        </div>
+    </div>
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+        <button mat-raised-button color="primary" [disabled]="form.invalid || submitted" type="submit">
+            <span> 保存 </span>
+        </button>
+    </div>
+</form>

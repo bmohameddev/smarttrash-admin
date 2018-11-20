@@ -1,0 +1,95 @@
+<div fxLayout="column">
+	<div class="flex-p">
+		<div fxLayout="row" fxLayoutAlign="space-between center" class="mb-075">
+			<form [formGroup]="searchForm" fxFlex fxLayout="row" fxLayoutAlign="start center">
+                <mat-form-field class="custom-form-field pb0-form-filed mr-05" appearance="outline">
+                    <mat-label> 请输入商品名称&nbsp;&nbsp;&nbsp; </mat-label>
+                    <button mat-icon-button matSuffix (click)="applySearch()">
+                        <mat-icon>search</mat-icon>
+                    </button>
+                    <input matInput formControlName="keyword" (change)="applySearch()">
+                </mat-form-field>   
+			</form>
+			<div 
+				*ngIf="commonData.city.topAdmin == user.id || user.role == 'SUPER'"
+				fxLayout="row" fxLayoutAlign="space-between center">
+				<button mat-stroked-button color="primary" class="list-top-btn" (click)="openProductDialog()">添加商品</button>
+				<button mat-stroked-button color="warn" class="list-top-btn" (click)="deleteProducts()">删除</button>
+			</div>
+		</div>
+		<table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows class="mat-elevation-z8 w-100"
+			(matSortChange)="customSort($event)">
+			<ng-container matColumnDef="select">
+				<th mat-header-cell *matHeaderCellDef>
+					<mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
+						[indeterminate]="selection.hasValue() && !isAllSelected()">
+					</mat-checkbox>
+				</th>
+				<td mat-cell *matCellDef="let row">
+					<mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+						[checked]="selection.isSelected(row)">
+					</mat-checkbox>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef> No </th>
+				<td mat-cell *matCellDef="let element;"> {{element.index + 1}}</td>
+			</ng-container>
+			<ng-container matColumnDef="name">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> 商品名称 </th>
+				<td mat-cell *matCellDef="let element"> {{element.name}} </td>
+			</ng-container>
+			<ng-container matColumnDef="point">
+				<th mat-header-cell *matHeaderCellDef> 积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.point | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="createdAt">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> 创建时间 </th>
+				<td mat-cell *matCellDef="let element"> {{element.createdAt | date:"yyyy.MM.dd - HH:mm:ss"}} </td>
+			</ng-container>
+			<ng-container matColumnDef="menu">
+				<th mat-header-cell *matHeaderCellDef class="text-center"> 操作 </th>
+				<td mat-cell *matCellDef="let element" class="text-center">
+					<ng-container *ngIf="commonData.city.topAdmin == user.id || user.role == 'SUPER'">
+						<button 
+							mat-icon-button [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger"
+							(click)="$event.stopPropagation()">
+							<mat-icon>more_vert</mat-icon>
+						</button>
+						<mat-menu #menu="matMenu" xPosition="before" overlapTrigger="true">
+							<span (mouseleave)="menuTrigger.closeMenu()">
+								<button mat-menu-item (click)="openProductDialog(element);">
+									<mat-icon>edit</mat-icon>
+									<span>编辑</span>
+								</button>
+								<button mat-menu-item (click)="deleteProduct($event, element.id)">
+									<mat-icon>delete</mat-icon>
+									<span>删除</span>
+								</button>
+							</span>
+						</mat-menu>
+					</ng-container>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="expandedDetail">
+				<td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+					<div class="example-element-detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+					</div>
+				</td>
+			</ng-container>
+			<tr mat-header-row *matHeaderRowDef="commonService.isMediaActive('gt-xs')? displayedColumns: displayedColumnsMobile"></tr>
+			<tr mat-row 
+				*matRowDef="let element; columns: commonService.isMediaActive('gt-xs')? displayedColumns: displayedColumnsMobile;" 
+				class="example-element-row"
+				[class.example-expanded-row]="expandedElement === element"
+				[style.background]="(element.index % 2)? '#F0F0F0' : ''">
+			</tr>
+			<tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+		</table>
+		<mat-paginator #paginator [pageSize]="10" [length]="totalCnt" [pageIndex]="pageIndex"
+			[pageSizeOptions]="[10, 20, 50, 100]" [showFirstLastButtons]="true" (page)="getProducts($event)">
+		</mat-paginator>
+	</div>
+</div>

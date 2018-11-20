@@ -1,0 +1,21 @@
+<div fxLayout="row wrap" class="h-100">
+	<div fxFlex="100" *ngIf="commonData.appInitialized">
+		<baidu-map
+			[options]="mapOptions"
+			class="baidu-map-box"
+			style="display: block; width: 100%; height: 100%"
+		>
+			<control type="maptype" [options]="mapTypeOpts"></control>
+			<marker
+				*ngFor="let trash of trashes"
+				[point]="{ lat: trash.lat + 0.0082, lng: trash.lng + 0.0137 }"
+				[options]="
+					trash.online ? markerOptionsOnline : markerOptionsOffline
+				"
+				(clicked)="showWindow($event, trash)"
+				(loaded)="setAnimation($event)"
+			>
+			</marker>
+		</baidu-map>
+	</div>
+</div>

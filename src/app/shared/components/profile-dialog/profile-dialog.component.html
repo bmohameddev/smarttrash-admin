@@ -1,0 +1,45 @@
+<div class="p-1" fxLayoutAlign="space-between center">
+	<h1 mat-dialog-title class="m-0">编辑个人资料</h1>
+	<button mat-icon-button mat-dialog-close tabindex="-1">
+		<mat-icon>close</mat-icon>
+	</button>
+</div>
+<div mat-dialog-content>
+	<div fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutAlign="center center"
+		class="form-field-outer">
+		<div fxFlex="100" fxLayout="column" fxLayoutAlign="center center"
+			class="picture-wrap"
+			*ngFor="let uploadFile of uploadFiles; let index= index">
+			<img *ngIf="selectedFileIndex != index" class="cropped-img"
+				[src]="uploadFile.croppedImage"
+				(click)="openCrop(index)" />
+			<div class="crop-wrap"
+				[class.hidden]="selectedFileIndex != index">
+				<app-upload-image 
+					(sendData)="addPicture($event)"
+					[aspectRatio]="3/3"
+					[originalImage]="uploadFiles[index].originalFile"
+					[firstCrop]="uploadFiles[index].croppedFile == ''"
+					[roundCropper]="true">
+				</app-upload-image>
+			</div>
+		</div>
+		<input id="fileToUpload" type="file" accept="image/*"
+			(change)="addFile($event)" style="display:none;">
+		<div class="w-25" *ngIf="uploadFiles.length == 0">
+			<label for="fileToUpload">
+				<div class="cloud-image"
+					[style.background-image]="'url(assets/img/extra/user.svg)'">
+				</div>
+			</label>
+		</div>
+	</div>
+</div>
+<div mat-dialog-actions>
+	<button mat-raised-button color="warn" mat-dialog-close tabindex="-1">
+		确认
+	</button>
+	<button mat-raised-button color="primary" [disabled]="submitted" (click)="editProfile()">
+		保存
+	</button>
+</div>

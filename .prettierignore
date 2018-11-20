@@ -1,0 +1,13 @@
+# add files you wish to ignore here
+**/*.md
+**/*.svg
+# **/test.ts
+
+.stylelintrc
+.prettierrc
+
+node_modules/
+vendor/
+.vscode/
+composer.json.json
+package.json

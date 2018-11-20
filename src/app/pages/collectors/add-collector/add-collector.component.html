@@ -1,0 +1,65 @@
+<form [formGroup]="form" (ngSubmit)="submitForm()" autocomplete="off" novalidate>
+    <div class="mb-1 muted-text" fxLayoutAlign="space-between center">
+        <h2>{{collector? '编辑' : '添加'}}收集员</h2>
+        <button mat-icon-button mat-dialog-close tabindex="-1">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <div fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutAlign="space-between space-between"
+            class="form-field-outer">
+            <mat-form-field fxFlex="100">
+                <input matInput placeholder="姓名" formControlName="name">
+                <mat-error *ngIf="form.controls.name.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="100">
+                <input matInput placeholder="电话号" formControlName="phone">
+                <mat-error *ngIf="form.controls.phone.errors?.pattern"> 电话号错误 </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="100">
+                <mat-label>卡号</mat-label>
+                <!-- <mat-checkbox matSuffix [(ngModel)]="isSelectedCardField[0]" [ngModelOptions]="{standalone: true}" (change)="addOrRemoveCardId(0)">
+                </mat-checkbox> -->
+                <input matInput formControlName="cardId_0" readonly>
+            </mat-form-field>
+            <!-- <mat-form-field fxFlex="100">
+                <mat-label>{{dustName[1]? dustName[1] : '垃圾类型2'}}卡号</mat-label>
+                <mat-checkbox matSuffix [(ngModel)]="isSelectedCardField[1]" [ngModelOptions]="{standalone: true}" (change)="addOrRemoveCardId(1)">
+                </mat-checkbox>
+                <input matInput formControlName="cardId_1" readonly>
+            </mat-form-field>
+            <mat-form-field fxFlex="100">
+                <mat-label>{{dustName[2]? dustName[2] : '垃圾类型3'}}卡号</mat-label>
+                <mat-checkbox matSuffix [(ngModel)]="isSelectedCardField[2]" [ngModelOptions]="{standalone: true}" (change)="addOrRemoveCardId(2)">
+                </mat-checkbox>
+                <input matInput formControlName="cardId_2" readonly>
+            </mat-form-field> -->
+            <mat-form-field fxFlex="100">
+                <mat-label> 姓别 </mat-label>
+                <mat-select formControlName="sex">
+                    <mat-option  value="MALE"> 男 </mat-option>
+                    <mat-option  value="FEMALE"> 女 </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form.controls.sex.errors?.required">
+                    必须填写
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field *ngIf="authInfo?.role == 'SUPER'" fxFlex="100">
+                <input matInput type="text" formControlName="city" [matAutocomplete]="autoCity" placeholder="城市"
+                    (focus)="changeAutocompleteCities()">
+                <mat-autocomplete (keydown.enter)="$event.stopPropagation()"
+                    #autoCity="matAutocomplete">
+                    <mat-option *ngFor="let city of autocompleteCities" [value]="city"> {{ city }} </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field fxFlex="100">
+                <input matInput formControlName="address" placeholder="地址">
+            </mat-form-field>
+        </div>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="end center">
+        <button mat-raised-button color="primary" [disabled]="submitted" type="submit">
+            <span> 保 存 </span>
+        </button>
+    </div>
+</form>

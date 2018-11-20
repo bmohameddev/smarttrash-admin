@@ -1,0 +1,23 @@
+<form [formGroup]="form" (ngSubmit)="submitForm()" autocomplete="off" novalidate>
+    <div class="p-1" fxLayoutAlign="space-between center">
+        <h1 mat-dialog-title class="m-0">扣除积分</h1>
+        <button mat-icon-button mat-dialog-close tabindex="-1">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <div fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutAlign="space-between space-between"
+            class="form-field-outer">
+            <mat-form-field fxFlex="100">
+                <input matInput numeric numericType="decimal" formControlName="deductionPoint" placeholder="扣除积分">
+                <mat-error *ngIf="form.controls.deductionPoint.errors?.required"> 必须填写 </mat-error>
+                <mat-error *ngIf="form.controls.deductionPoint.errors?.min"> 扣除积分错误 </mat-error>
+            </mat-form-field>
+        </div>
+    </div>
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end center">
+        <button mat-raised-button color="primary" [disabled]="form.invalid" type="submit">
+            <span> 保存 </span>
+        </button>
+    </div>
+</form>

@@ -1,0 +1,144 @@
+<div fxLayout="column">
+	<div>
+		<div class="mx-05">
+			<app-select-date [selectType]="'range'" [dateType]="dateType" (sendData)="changeDate($event)"></app-select-date>
+		</div>
+
+		<div fxLayout="row" class="mb-1">
+			<div fxFlex="30" fxLayout="column" fxLayoutAlign="space-between">
+				<mat-card class="main-box-shadow m-05">
+					<div fxLayout="row" fxLayoutAlign="space-between center" class="muted-text">
+						<mat-icon class="icon-lg">people</mat-icon>
+						<div>
+							<h2 class="text-center">{{totalUserCnt? totalUserCnt : 0}}</h2>
+							<h3 class="fw-400">总户数</h3>
+						</div>                
+					</div>            
+				</mat-card>
+				<mat-card class="main-box-shadow m-05">
+					<div fxLayout="row" fxLayoutAlign="space-between center" class="muted-text">
+						<mat-icon class="icon-lg">people_outline</mat-icon>
+						<div>
+							<h2 class="text-center">{{resident? resident : 0}}</h2>
+							<h3 class="fw-400">常住户数</h3>
+						</div>                
+					</div>            
+				</mat-card>
+			</div>
+
+			<div fxFlex="70" class="flex-p">
+				<mat-card class="main-box-shadow">
+					<div *ngIf="pointResult" fxFlex fxLayout="column" class="p-0">
+						<div *ngFor="let dust of dustName; let idx = index;" fxLayout="row wrap">
+							<h4 fxFlex="100" class="muted-text text-center">{{dust? dust : '垃圾'+idx}}</h4>
+							<div fxFlex="25" fxLayout="row" fxLayoutAlign="space-between center" class="muted-text p-1">
+								<mat-icon class="icon-lg">shopping_cart</mat-icon>
+								<div fxLayout="column" fxLayoutAlign="center center">
+									<h3>{{pointResult.dustUserCnt[idx]? pointResult.dustUserCnt[idx] : 0}}</h3>
+									<h6>{{dust? dust : '垃圾'+idx}}数</h6>
+								</div>
+							</div>
+							<div fxFlex="25" fxLayout="row" fxLayoutAlign="space-between center" class="muted-text p-1">
+								<mat-icon color="accent" class="icon-lg">assignment_turned_in</mat-icon>
+								<div fxLayout="column" fxLayoutAlign="center center">
+									<h3>{{pointResult.dustTotalCnt[idx]? ((pointResult.dustPassedCnt[idx] * 100 / pointResult.dustTotalCnt[idx]) | currency:'USD':'':'1.1-1') : 100}}%</h3>
+									<h6>正确率</h6>
+								</div>
+							</div>
+							<div fxFlex="25" fxLayout="row" fxLayoutAlign="space-between center" class="muted-text p-1">
+								<mat-icon color="warn" class="icon-lg">assignment_ind</mat-icon>
+								<div fxLayout="column" fxLayoutAlign="center center">
+									<h3>{{totalUserCnt? ((pointResult.dustUserCnt[idx] * 100 / totalUserCnt) | currency:'USD':'':'1.1-1') : 100}}%</h3>
+									<h6>参与率</h6>
+								</div>
+							</div>
+							<div fxFlex="25" fxLayout="row" fxLayoutAlign="space-between center" class="muted-text p-1">
+								<mat-icon color="primary" class="icon-lg">assignment</mat-icon>
+								<div fxLayout="column" fxLayoutAlign="center center">
+									<h3>{{pointResult.dustAmount[idx] | currency:'USD':'':'1.1-1'}}</h3>
+									<h6>重量(kg)</h6>
+								</div>
+							</div>
+						</div>
+						<!-- <div fxLayout="row wrap">
+							<h4 fxFlex="100" class="muted-text text-center">{{dustName[1]? dustName[1] : '垃圾B'}}</h4>
+							<div fxFlex="25" fxLayout="row" fxLayoutAlign="space-between center" class="muted-text p-1">
+								<mat-icon class="icon-lg">shopping_cart</mat-icon>
+								<div fxLayout="column" fxLayoutAlign="center center">
+									<h3>{{dustBUserCnt? dustBUserCnt : 0}}</h3>
+									<h6>{{dustName[1]? dustName[1] : '垃圾B'}}数</h6>
+								</div>
+							</div>
+							<div fxFlex="25" fxLayout="row" fxLayoutAlign="space-between center" class="muted-text p-1">
+								<mat-icon color="accent" class="icon-lg">assignment_turned_in</mat-icon>
+								<div fxLayout="column" fxLayoutAlign="center center">
+									<h3>{{dustBTotalCnt? ((dustBPassedCnt * 100 / dustBTotalCnt) | currency:'USD':'':'1.1-1') : 100}}%</h3>
+									<h6>正确率</h6>
+								</div>
+							</div>
+							<div fxFlex="25" fxLayout="row" fxLayoutAlign="space-between center" class="muted-text p-1">
+								<mat-icon color="warn" class="icon-lg">assignment_ind</mat-icon>
+								<div fxLayout="column" fxLayoutAlign="center center">
+									<h3>{{totalUserCnt? ((dustBUserCnt * 100 / totalUserCnt) | currency:'USD':'':'1.1-1') : 100}}%</h3>
+									<h6>参与率</h6>
+								</div>
+							</div>
+							<div fxFlex="25" fxLayout="row" fxLayoutAlign="space-between center" class="muted-text p-1">
+								<mat-icon color="primary" class="icon-lg">assignment</mat-icon>
+								<div fxLayout="column" fxLayoutAlign="center center">
+									<h3>{{dustBAmount | currency:'USD':'':'1.1-1'}}</h3>
+									<h6>重量(kg)</h6>
+								</div>
+							</div>
+						</div> -->
+					</div>
+				</mat-card>
+			</div>
+
+		</div>
+
+		<table mat-table [dataSource]="dataSource" multiTemplateDataRows class="mat-elevation-z8 w-100 m-05">
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef> 
+					{{dateType == 'date'? '日': ''}} {{dateType == 'month'? '月': ''}} {{dateType == 'year'? '年': ''}} 
+				</th>
+				<td mat-cell *matCellDef="let element;"> {{element.key}} </td>
+			</ng-container>
+			<ng-container *ngFor="let dust of dustName; let idx = index;" [matColumnDef]="'dustAmount'+ idx">
+				<th mat-header-cell *matHeaderCellDef> {{ dustName[idx]? dustName[idx] : idx }}重量 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.dustAmount[idx] | currency:'USD':'':'1.1-1'}}
+				</td>
+			</ng-container>
+			<!-- <ng-container matColumnDef="dustAAmount">
+				<th mat-header-cell *matHeaderCellDef> {{ dustName[0]? dustName[0] : 'A' }}重量 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.dustAAmount | currency:'USD':'':'1.1-1'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="dustBAmount">
+				<th mat-header-cell *matHeaderCellDef> {{ dustName[1]? dustName[1] : 'B' }}重量 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.dustBAmount | currency:'USD':'':'1.1-1'}}
+				</td>
+			</ng-container> -->
+			<ng-container matColumnDef="totalPoint">
+				<th mat-header-cell *matHeaderCellDef> 总积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.totalPoint | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="totalCnt">
+				<th mat-header-cell *matHeaderCellDef> 投放次数 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.totalCnt}}
+				</td>
+			</ng-container>
+		
+			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+			<tr mat-row *matRowDef="let element; columns: displayedColumns;" class="example-element-row"
+				[style.background]="(element.index % 2)? '#F0F0F0' : ''">
+			</tr>
+		</table>
+	</div>
+</div>

@@ -1,0 +1,71 @@
+<form [formGroup]="form" (ngSubmit)="payment()" autocomplete="off" novalidate>
+	<div class="p-1" fxLayoutAlign="space-between center">
+		<h1 mat-dialog-title class="m-0">兑换总积分</h1>
+		<button mat-icon-button mat-dialog-close tabindex="-1">
+			<mat-icon>close</mat-icon>
+		</button>
+	</div>
+	<div mat-dialog-content>
+		<div
+			fxLayout="column"
+			fxLayout.gt-sm="row wrap"
+			fxLayoutAlign="space-between space-between"
+			class="form-field-outer"
+		>
+			<mat-form-field fxFlex="100">
+				<mat-label>垃圾分类</mat-label>
+				<mat-select formControlName="dustType" (selectionChange)="updateTotalPoint()">
+					<mat-option *ngFor="let dust of dusts; let i = index" [value]="i">{{ dust.name }}</mat-option>
+				</mat-select>
+				<mat-error *ngIf="form.controls.dustType.errors?.required"> 必须填写 </mat-error>
+			</mat-form-field>
+			<mat-form-field fxFlex="100">
+				<mat-label> 开始日期 </mat-label>
+				<input matInput [matDatepicker]="startDate" formControlName="startDate" (dateChange)="getReport()" />
+				<mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+				<mat-datepicker #startDate></mat-datepicker>
+				<mat-error *ngIf="form.controls.startDate.errors?.required"> 必须填写 </mat-error>
+			</mat-form-field>
+			<mat-form-field fxFlex="100">
+				<mat-label> 结束日期 </mat-label>
+				<input matInput [matDatepicker]="endDate" formControlName="endDate" (dateChange)="getReport()" />
+				<mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+				<mat-datepicker #endDate></mat-datepicker>
+				<mat-error *ngIf="form.controls.endDate.errors?.required"> 必须填写 </mat-error>
+			</mat-form-field>
+			<mat-form-field fxFlex="50">
+				<mat-label>总积分</mat-label>
+				<input matInput numeric numericType="decimal" formControlName="totalPoint" readonly />
+				<mat-error *ngIf="form.controls.totalPoint.errors?.required"> 必须填写 </mat-error>
+			</mat-form-field>
+			<mat-form-field fxFlex="50">
+				<mat-label>总钱</mat-label>
+				<input matInput numeric numericType="decimal" formControlName="totalMoney" readonly />
+				<mat-error *ngIf="form.controls.totalMoney.errors?.required"> 必须填写 </mat-error>
+			</mat-form-field>
+			<mat-form-field fxFlex="33">
+				<mat-label>兑换积分</mat-label>
+				<input matInput numeric numericType="decimal" formControlName="paymentPoint" (keyup)="changePoint()" />
+				<mat-error *ngIf="form.controls.paymentPoint.errors?.required"> 必须填写 </mat-error>
+			</mat-form-field>
+			<mat-form-field fxFlex="33">
+				<mat-label>汇率</mat-label>
+				<input matInput numeric numericType="decimal" formControlName="rate" readonly />
+				<mat-error *ngIf="form.controls.rate.errors?.required"> 必须填写 </mat-error>
+			</mat-form-field>
+			<mat-form-field fxFlex="33">
+				<mat-label>兑换钱</mat-label>
+				<input matInput numeric numericType="decimal" formControlName="paymentMoney" readonly />
+				<mat-error *ngIf="form.controls.paymentMoney.errors?.required"> 必须填写 </mat-error>
+			</mat-form-field>
+			<mat-form-field class="w-100">
+				<input matInput placeholder="内容说明" formControlName="description" />
+			</mat-form-field>
+		</div>
+	</div>
+	<div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+		<button mat-raised-button color="primary" [disabled]="submitted" type="submit">
+			<span> 保存 </span>
+		</button>
+	</div>
+</form>

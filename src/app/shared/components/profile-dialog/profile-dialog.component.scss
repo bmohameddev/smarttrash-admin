@@ -1,0 +1,23 @@
+.crop-wrap {
+	width: 100%;
+}
+
+.cropped-img {
+	border-radius: 5px;
+	width        : 240px !important;
+	height       : 240px !important;
+	border-radius: 50%;
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+
+.cloud-image {
+	width              : 240px;
+	height             : 240px;
+	background-position: center;
+	background-size    : cover;
+	background-repeat  : no-repeat;
+	text-align         : center;
+}

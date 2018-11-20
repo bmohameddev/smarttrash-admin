@@ -1,0 +1,50 @@
+<div fxLayout="row" fxLayoutAlign="space-between center">
+	<div fxLayout="row">
+		<mat-button-toggle-group #controls="matButtonToggleGroup" appearance="legacy" [(ngModel)]="dateType" (change)="changeDate()">
+			<mat-button-toggle value="year" checked="true">
+				年
+			</mat-button-toggle>
+			<mat-button-toggle value="month">
+				月
+			</mat-button-toggle>
+			<mat-button-toggle value="date">
+				日
+			</mat-button-toggle>
+		</mat-button-toggle-group>
+	</div>
+	<form class="user-search mb-1" 
+		[class.show]="(selectType == 'range' && controls.value != 'year') || (selectType == 'correct')">
+		<mat-form-field>
+			<mat-select placeholder="选择年份" [(ngModel)]="selectedYear" name="year" (ngModelChange)="changeDate()">
+				<mat-option *ngFor="let year of years" [value]="year.value">
+					{{year.viewValue}}
+				</mat-option>
+			</mat-select>
+		</mat-form-field>
+	</form>
+	<form class="user-search mb-1" 
+		[class.show]="(selectType == 'range' && controls.value == 'date') || (selectType == 'correct' && controls.value != 'year')">
+		<mat-form-field>
+			<mat-select placeholder="选择一个月" [(ngModel)]="selectedMonth" name="month"
+				(ngModelChange)="changeDate()">
+				<ng-container *ngFor="let month of months">
+					<mat-option *ngIf="checkDate('month', month.value)" [value]="month.value">
+						{{month.viewValue}}
+					</mat-option>
+				</ng-container>
+			</mat-select>
+		</mat-form-field>
+	</form>
+	<form class="user-search mb-1" [class.show]="selectType == 'correct' && controls.value == 'date'">
+		<mat-form-field>
+			<mat-select placeholder="选择一个日" [(ngModel)]="selectedDate" name="date"
+				(ngModelChange)="changeDate()">
+				<ng-container *ngFor="let date of dates">
+					<mat-option *ngIf="checkDate('date', date.value)" [value]="date.value">
+						{{date.viewValue}}
+					</mat-option>
+				</ng-container>
+			</mat-select>
+		</mat-form-field>
+	</form>
+</div>

@@ -1,0 +1,28 @@
+<button mat-icon-button [matMenuTriggerFor]="userMenu" #userMenuTrigger="matMenuTrigger" >
+    <mat-icon>account_circle</mat-icon>
+</button>
+
+<mat-menu #userMenu="matMenu" [overlapTrigger]="false" class="toolbar-dropdown-menu user-menu">
+    <!-- <span (mouseleave)="userMenuTrigger.closeMenu()"> -->
+        <mat-toolbar color="primary">
+            <div fxLayout="row" fxLayoutAlign="space-around center" class="user-info">
+                <img [defaultImage]="'assets/img/extra/user.svg'" [lazyLoad]="serverUrl+'/'+user.profilePicture"
+                    alt="user-image" width="80" height="80" class="rounded mat-elevation-z6">
+                <h2> {{user?.name? user.name: '管理员'}} </h2>
+            </div>  
+        </mat-toolbar>
+        <a mat-menu-item routerLink="/changepassword"> 
+            <mat-icon>vpn_key</mat-icon>
+            <span>修改密码</span> 
+        </a>
+        <a mat-menu-item (click)="editProfile()"> 
+            <mat-icon>person_outline</mat-icon>
+            <span>编辑资料</span> 
+        </a>
+        <div class="divider"></div>
+        <a mat-menu-item (click)="logout()"> 
+            <mat-icon>power_settings_new</mat-icon>
+            <span>注销</span> 
+        </a>
+    <!-- </span> -->
+</mat-menu>

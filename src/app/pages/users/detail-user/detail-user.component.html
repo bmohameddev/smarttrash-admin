@@ -1,0 +1,96 @@
+<div fxLayout="column">
+	<div class="flex-p">
+		<div fxLayout="row" fxLayoutAlign="space-between center">
+			<div 
+				*ngIf="user"
+				fxLayout="row" fxLayoutAlign="space-between center">
+				<button mat-stroked-button color="primary" (click)="goToList()">回设备管理</button>
+			</div>
+			<form class="user-search show mb-1" [formGroup]="form" (ngSubmit)="searchBoxAction()" autocomplete="off" novalidate>
+				<mat-form-field>
+					<mat-label>请输入姓名或ID</mat-label>
+					<input type="text" formControlName="search" matInput [matAutocomplete]="auto">
+					<mat-autocomplete (closed)="searchBoxAction()" #auto="matAutocomplete">
+						<mat-option *ngFor="let user of autocomplete" [value]="user.cardIds" (optionSelected)="searchBoxAction($event)">
+							卡号:&nbsp;{{user.cardIds}}&nbsp;&nbsp;&nbsp;姓名:&nbsp;{{user.name}}
+						</mat-option>
+					</mat-autocomplete>
+				</mat-form-field>
+			</form>
+		</div>
+		<div class="member-detail-wrap" *ngIf="user">
+			<div class="user-content" fxLayout="row" fxLayoutAlign="space-around center">
+				<div fxFlex="20" fxFlex.xs="30" fxLayout="column" fxLayoutAlign="center center">
+					<div class="user-img">
+						<img [src]="user?.profilePicture? serverUrl+'/'+user.profilePicture:
+							'assets/img/extra/user.svg'" class="transition-2 pointer"
+							[class.blocked]="user.state == 'SUSPENDED'">
+						<mat-icon *ngIf="user.state == 'SUSPENDED'" class="warn-color">block</mat-icon>
+					</div>
+					<span> 
+						{{user?.name? user.name : '***'}}
+					</span>
+				</div>
+				<div fxFlex="80" fxFlex.xs="70" fxLayout="row" fxLayout.xs="column" class="user-details transition-2">
+					<div fxFlex="30" fxFlex.xs="100" fxLayout="column">
+						<p fxLayout="row" fxLayoutAlign="start center">
+							<mat-icon class="muted-text">card_membership</mat-icon>
+							<span>{{user.cardIds}}</span>
+						</p>
+						<p fxLayout="row" fxLayoutAlign="start center">
+							<mat-icon class="muted-text">call</mat-icon>
+							<span>{{user.phone? user.phone : '---'}}</span>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div *ngIf="user">
+			<app-select-date [selectType]="'range'" (sendData)="changeDate($event)"></app-select-date>
+		</div>
+
+		<table *ngIf="user" mat-table [dataSource]="dataSource" multiTemplateDataRows class="mat-elevation-z8 w-100">
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef> 
+					{{dateType == 'date'? '日': ''}} {{dateType == 'month'? '月': ''}} {{dateType == 'year'? '年': ''}} 
+				</th>
+				<td mat-cell *matCellDef="let element;"> {{element.key}} </td>
+			</ng-container>
+			<ng-container matColumnDef="totalPoint">
+				<th mat-header-cell *matHeaderCellDef> 总积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.totalPoint | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="withdrawPoint">
+				<th mat-header-cell *matHeaderCellDef> 兑换积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.withdrawPoint | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="deductionPoint">
+				<th mat-header-cell *matHeaderCellDef> 扣除积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.deductionPoint | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="remainingPoint">
+				<th mat-header-cell *matHeaderCellDef> 剩余积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.remainingPoint | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="totalCnt">
+				<th mat-header-cell *matHeaderCellDef> 投放次数 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.totalCnt}}
+				</td>
+			</ng-container>
+		
+			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+			<tr mat-row *matRowDef="let element; columns: displayedColumns;" class="example-element-row"
+				[style.background]="(element.index % 2)? '#F0F0F0' : ''">
+			</tr>
+		</table>
+	</div>
+</div>

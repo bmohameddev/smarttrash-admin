@@ -1,0 +1,148 @@
+<div fxLayout="column">
+	<div class="flex-p">
+		<div fxLayout="row" fxLayoutAlign="space-between center" class="mb-075">
+			<form [formGroup]="searchForm" fxFlex fxLayout="row" fxLayoutAlign="start center">
+                <mat-form-field class="custom-form-field pb0-form-filed mr-05" appearance="outline">
+                    <mat-label> 请输入城市名称&nbsp;&nbsp;&nbsp; </mat-label>
+                    <button mat-icon-button matSuffix (click)="applySearch()">
+                        <mat-icon>search</mat-icon>
+                    </button>
+                    <input matInput formControlName="keyword" (change)="applySearch()">
+                </mat-form-field>   
+			</form>
+			<div fxLayout="row" fxLayoutAlign="space-between center">
+				<button mat-stroked-button color="primary" class="list-top-btn" (click)="openCityDialog()">添加城市</button>
+				<button mat-stroked-button color="warn" class="list-top-btn" (click)="deleteCities()">删除</button>
+			</div>
+		</div>
+		<table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows class="mat-elevation-z8 w-100"
+			(matSortChange)="customSort($event)">
+			<ng-container matColumnDef="select">
+				<th mat-header-cell *matHeaderCellDef>
+					<mat-checkbox (change)="$event ? masterToggle() : null"
+						[checked]="selection.hasValue() && isAllSelected()"
+						[indeterminate]="selection.hasValue() && !isAllSelected()">
+					</mat-checkbox>
+				</th>
+				<td mat-cell *matCellDef="let row">
+					<mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+						[checked]="selection.isSelected(row)">
+					</mat-checkbox>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef> No </th>
+				<td mat-cell *matCellDef="let element;"> {{element.index + 1}}</td>
+			</ng-container>
+			<ng-container matColumnDef="name">
+				<th mat-header-cell *matHeaderCellDef> 城市名称 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.name}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="topAdmin">
+				<th mat-header-cell *matHeaderCellDef> 地区总管理员 </th>
+				<td mat-cell *matCellDef="let element">
+					<mat-chip-list>
+						<mat-chip 
+							*ngIf="element.topAdmin"
+							class="mat-admin-chip"
+							color="accent" 
+							selected="true">
+							<img
+								[src]="element.topAdmin.profilePicture? serverUrl+'/' + element.topAdmin.profilePicture: 'assets/img/extra/user.svg'" 
+								alt="admin-image">
+							<span>{{element.topAdmin.name}}</span>
+						</mat-chip>
+					</mat-chip-list>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="admins">
+				<th mat-header-cell *matHeaderCellDef> 地区管理员 </th>
+				<td mat-cell *matCellDef="let element">
+					<mat-chip-list>
+						<mat-chip 
+							*ngFor="let admin of element.admin" 
+							class="mat-admin-chip"
+							color="accent" 
+							selected="true">
+							<img
+								[src]="admin?.profilePicture? serverUrl+'/' + admin.profilePicture: 'assets/img/extra/user.svg'" 
+								alt="admin-image">
+							<span>{{admin.name}}</span>
+						</mat-chip>
+					</mat-chip-list>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="menu">
+				<th mat-header-cell *matHeaderCellDef class="text-center"> 操作 </th>
+				<td mat-cell *matCellDef="let element" class="text-center">
+					<button mat-icon-button [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger"
+						(click)="$event.stopPropagation()">
+						<mat-icon>more_vert</mat-icon>
+					</button>
+					<mat-menu #menu="matMenu" xPosition="before" overlapTrigger="true">
+						<span (mouseleave)="menuTrigger.closeMenu()">
+							<button mat-menu-item (click)="openCityDialog(element);">
+								<mat-icon>edit</mat-icon>
+								<span>编辑</span>
+							</button>
+							<button mat-menu-item routerLink="/cities/detail/{{element.id}}">
+								<mat-icon>reorder</mat-icon>
+								<span>详细信息</span>
+							</button>
+							<button mat-menu-item color="warn" (click)="deleteCity($event, element.id)">
+								<mat-icon>delete</mat-icon>
+								<span>删除</span>
+							</button>
+						</span>
+					</mat-menu>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="expandedDetail">
+				<td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+					<div class="example-element-detail"
+						[@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+						<div class="p-1">
+							<div class="user-content" fxLayout="row" fxLayoutAlign="space-around start">
+								<div fxFlex="20" fxFlex.xs="30" fxLayout="column" fxLayoutAlign="center center">
+									<div class="user-img">
+										<img [src]="element?.topAdmin?.profilePicture? 
+											serverUrl+'/'+element.topAdmin.profilePicture : 'assets/img/extra/user.svg'" class="transition-2"
+											[class.blocked]="element?.topAdmin?.role? (element.topAdmin.role == 'SUSPENDED') : false">
+										<mat-icon
+											*ngIf="element?.topAdmin?.role? (element.topAdmin.role == 'SUSPENDED') : false"
+											class="warn-color">block
+										</mat-icon>
+									</div>
+									<span>{{element?.topAdmin?.name? '地区总管理员: ' + element.topAdmin.name : '***'}}</span>
+								</div>
+								<div fxFlex="80" fxFlex.xs="70" fxLayout="column" fxLayoutAlign="none none"
+									class="user-details transition-2">
+									<div fxFlex="30" fxFlex.xs="30" fxLayout="column">
+										<!-- <p fxLayout="row" fxLayoutAlign="start start">
+											<mat-icon class="muted-text">live_help</mat-icon>
+											<span style="text-align: justify;">{{element.deviceId}}</span>
+										</p> -->
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</td>
+			</ng-container>
+			<tr mat-header-row *matHeaderRowDef="commonService.isMediaActive('gt-xs')? displayedColumns: displayedColumnsMobile"></tr>
+			<tr mat-row 
+				*matRowDef="let element; columns: commonService.isMediaActive('gt-xs')? displayedColumns: displayedColumnsMobile;" 
+				class="example-element-row"
+				[class.example-expanded-row]="expandedElement === element"
+				(click)="expandedElement = expandedElement === element ? null : element"
+				[style.background]="(element.index % 2)? '#F0F0F0' : ''">
+			</tr>
+			<tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+		</table>
+		<mat-paginator #paginator [pageSize]="10" [length]="totalCnt" [pageIndex]="pageIndex"
+			[pageSizeOptions]="[10, 20, 50, 100]" [showFirstLastButtons]="true" (page)="getCities($event)">
+		</mat-paginator>
+	</div>
+</div>

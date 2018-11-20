@@ -1,0 +1,128 @@
+<div fxLayout="column">
+	<div class="flex-p">
+		<div fxLayout="row" fxLayoutAlign="space-between center">
+			<h3 class="muted-text">设备总数: {{totalTrashes}}</h3>
+			<!-- <div 
+				*ngIf="trash"
+				fxLayout="row" fxLayoutAlign="space-between center">
+				<button mat-stroked-button color="primary" (click)="goToList()">回设备管理</button>
+			</div>
+			<form class="user-search show mb-1" [formGroup]="form" (ngSubmit)="searchBoxAction()" autocomplete="off" novalidate>
+				<mat-form-field>
+					<mat-label>请输入设备ID</mat-label>
+					<input type="text" formControlName="search" matInput [matAutocomplete]="auto">
+					<mat-autocomplete (closed)="searchBoxAction()" #auto="matAutocomplete">
+						<mat-option *ngFor="let trash of autocomplete" [value]="trash.deviceId" (optionSelected)="searchBoxAction($event)">
+							设备ID:&nbsp;{{trash.deviceId}}
+						</mat-option>
+					</mat-autocomplete>
+				</mat-form-field>
+			</form> -->
+		</div>
+		
+		<app-select-date [selectType]="'correct'" (sendData)="changeDate($event)"></app-select-date>
+
+		<table mat-table [dataSource]="dataSource" multiTemplateDataRows class="mat-elevation-z8 w-100">
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef> No </th>
+				<td mat-cell *matCellDef="let element;"> {{element.index + 1}} </td>
+			</ng-container>
+			<ng-container matColumnDef="deviceId">
+				<th mat-header-cell *matHeaderCellDef> 
+					设备ID
+				</th>
+				<td mat-cell *matCellDef="let element;"> {{element.deviceId}} </td>
+			</ng-container>
+			<ng-container matColumnDef="city">
+				<th mat-header-cell *matHeaderCellDef> 城市 </th>
+				<td mat-cell *matCellDef="let element"> 
+					{{element.city? element.city.name : ''}} 
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="address">
+				<th mat-header-cell *matHeaderCellDef> 详细地址 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.address? element.address: ''}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="dustAAmount">
+				<th mat-header-cell *matHeaderCellDef> {{ dustName[0]? dustName[0] : 'A' }}重量 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.dustAAmount | currency:'USD':'':'1.1-1'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="dustBAmount">
+				<th mat-header-cell *matHeaderCellDef> {{ dustName[1]? dustName[1] : 'B' }}重量 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.dustBAmount | currency:'USD':'':'1.1-1'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="totalPoint">
+				<th mat-header-cell *matHeaderCellDef> 积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.totalPoint | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="operationCnt">
+				<th mat-header-cell *matHeaderCellDef> 投放次数 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.operationCnt}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="topAdmin">
+				<th mat-header-cell *matHeaderCellDef> 地区总管理员 </th>
+				<td mat-cell *matCellDef="let element"> 
+					<mat-chip-list>
+						<mat-chip 
+							*ngIf="element.city.topAdmin"
+							class="mat-admin-chip"
+							color="accent" 
+							selected="true">
+							<img
+								[src]="element.city.topAdmin?.profilePicture? serverUrl+'/' + element.city.topAdmin.profilePicture: 'assets/img/extra/user.svg'" 
+								alt="admin-image">
+							<span>{{element.city.topAdmin?.name}}</span>
+						</mat-chip>
+					</mat-chip-list>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="admin">
+				<th mat-header-cell *matHeaderCellDef> 	地区管理员 </th>
+				<td mat-cell *matCellDef="let element"> 
+					<mat-chip-list>
+						<mat-chip 
+							*ngIf="element.admin && element.admin.length"
+							class="mat-admin-chip"
+							color="accent" 
+							selected="true">
+							<img
+								[src]="element.admin[0].profilePicture? serverUrl+'/' + element.admin[0].profilePicture: 'assets/img/extra/user.svg'" 
+								alt="admin-image">
+							<span>{{element.admin[0].name}}</span>
+						</mat-chip>
+					</mat-chip-list>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="state">
+				<th mat-header-cell *matHeaderCellDef>
+					<div fxLayout="row" fxLayoutAlign="center center"> 状态 </div>
+				</th>
+				<td mat-cell *matCellDef="let element">
+					<div fxLayout="row" fxLayoutAlign="center center">
+						<mat-icon color="{{element.online? 'primary' : 'warn'}}">
+							{{element.online? 'wifi' : 'wifi_off'}}
+						</mat-icon>
+					</div>
+				</td>
+			</ng-container>
+		
+			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+			<tr mat-row *matRowDef="let element; columns: displayedColumns;" class="example-element-row"
+				[style.background]="(element.index % 2)? '#F0F0F0' : ''">
+			</tr>
+		</table>
+		<mat-paginator #paginator [pageSize]="10" [length]="totalCnt" [pageIndex]="pageIndex"
+			[pageSizeOptions]="[10, 20, 50, 100]" [showFirstLastButtons]="true" (page)="getTrashesReport($event)">
+		</mat-paginator>
+	</div>
+</div>

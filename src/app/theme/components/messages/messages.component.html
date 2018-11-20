@@ -1,0 +1,25 @@
+<button mat-icon-button *ngIf="!notificationsActive">
+    <mat-icon>notifications</mat-icon>
+</button>
+<button mat-icon-button *ngIf="notificationsActive" [matMenuTriggerFor]="messagesMenu" (click)="openMessagesMenu()">
+    <mat-icon>notifications</mat-icon>
+    <div class="notification-active"></div>
+</button>
+<mat-menu #messagesMenu="matMenu" [overlapTrigger]="false" class="toolbar-dropdown-menu messages">
+    <!--<span (mouseleave)="onMouseLeave()">-->
+    <mat-tab-group backgroundColor="primary" (click)="stopClickPropagate($event)" [selectedIndex]="selectedTab">
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <h2>报告</h2>
+            </ng-template>
+            <mat-card class="content p-1">
+                <div fxLayout="column" fxLayoutAlign="none">
+                    <div fxLayout="column" fxLayoutAlign="none" class="w-100"*ngIf="!this.user.weixinOpenId">
+                        <span class="p-1">请连接微信</span>
+                    </div>
+                </div>
+            </mat-card>
+        </mat-tab>
+    </mat-tab-group>
+    <!--</span>-->
+</mat-menu>

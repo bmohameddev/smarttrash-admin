@@ -1,0 +1,17 @@
+<div class="p-1" fxLayoutAlign="space-between center">
+	<h1 class="m-0 w-100 text-center">垃圾分类手抄报的文字资料大全</h1>
+	<button mat-icon-button mat-dialog-close tabindex="-1">
+		<mat-icon>close</mat-icon>
+	</button>
+</div>
+
+<div mat-dialog-content>
+	<div fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutAlign="center center"
+		class="form-field-outer">
+		<div class="w-100">
+			<div class="ql-container ql-snow ql-disabled" style="border: 0px;">
+				<div class="ql-editor" [innerHTML]="data.classificationGuide"></div>
+			</div>
+		</div>
+	</div>
+</div>

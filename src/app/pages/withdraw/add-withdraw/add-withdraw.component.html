@@ -1,0 +1,75 @@
+<form [formGroup]="form" (ngSubmit)="withdraw()" autocomplete="off" novalidate>
+    <div class="p-1" fxLayoutAlign="space-between center">
+        <h1 mat-dialog-title class="m-0"> 积分换 </h1>
+        <button mat-icon-button mat-dialog-close tabindex="-1">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <div fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutAlign="space-between space-between"
+            class="form-field-outer">
+            <div class="w-100">
+                <div class="user-content" fxLayout="row" fxLayoutAlign="start">
+                    <div fxFlex="20" fxLayout="column" fxLayoutAlign="start center">
+                        <div class="user-img">
+                            <img [src]="user?.profilePicture? serverUrl+'/'+user.profilePicture:
+                                'assets/img/extra/user.svg'" class="transition-2 pointer"
+                                [class.blocked]="user.state == 'SUSPENDED'">
+                            <mat-icon *ngIf="user.state == 'SUSPENDED'" class="warn-color">block</mat-icon>
+                        </div>
+                    </div>
+                    <div fxFlex="80" fxLayout="row" class="user-details transition-2">
+                        <div fxFlex="50" fxLayout="column" class="user-detail-item">
+                            <p fxLayout="row" fxLayoutAlign="start center">
+                                <span>姓名: </span>{{user.name}}
+                            </p>
+                            <p fxLayout="row" fxLayoutAlign="start center">
+                                <span>现在卡号: </span>{{user.currentCardId}}
+                            </p>
+                            <p fxLayout="row" fxLayoutAlign="start center">
+                                <span>积分: </span>{{user.totalPoint | currency:'USD':'':'1.2-2'}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section fxFlex class="ml-1 py-1">
+                <label>兑换方式:</label>
+                <mat-radio-group [(ngModel)]="withdrawType" [ngModelOptions]="{standalone: true}" (change)="updateWithdrawPoint()">
+                    <mat-radio-button value="PRODUCT" class="mx-1">商品</mat-radio-button>
+                    <mat-radio-button value="MANUAL" class="mx-1">手动</mat-radio-button>
+                </mat-radio-group>
+            </section>
+            <ng-container *ngIf="withdrawType == 'PRODUCT'">
+                <mat-form-field fxFlex="80">
+                    <mat-label>商品</mat-label>
+                    <input matInput type="text" formControlName="product" 
+                        (blur)="selectProduct()"  (keydown.enter)="$event.preventDefault()"
+                        [matAutocomplete]="autoProduct" placeholder="请输入商品名称或选择商品">
+                    <mat-autocomplete (keydown.enter)="$event.stopPropagation()" #autoProduct="matAutocomplete">
+                        <mat-option *ngFor="let product of autocompleteProducts" [value]="product.name"> {{ product.name }} </mat-option>
+                    </mat-autocomplete>
+                    <mat-error *ngIf="form.controls.product.errors?.required"> 必须填写 </mat-error>
+                </mat-form-field>
+                <mat-form-field fxFlex="20">
+                    <mat-label>商品数量</mat-label>
+                    <input matInput numeric numericType="number" formControlName="productCount" (change)="updateWithdrawPoint()">
+                    <mat-error *ngIf="form.controls.productCount.errors?.required"> 必须填写 </mat-error>
+                </mat-form-field>
+            </ng-container>
+            <mat-form-field fxFlex="100">
+                <mat-label>兑换积分</mat-label>
+                <input matInput numeric numericType="decimal" formControlName="withdrawPoint" [readonly]="withdrawType != 'MANUAL'">
+                <mat-error *ngIf="form.controls.withdrawPoint.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field class="w-100">
+                <input matInput placeholder="内容说明" formControlName="description">
+            </mat-form-field>
+        </div>
+    </div>
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+        <button mat-raised-button color="primary" [disabled]="submitted" type="submit">
+            <span> 保存 </span>
+        </button>
+    </div>
+</form>

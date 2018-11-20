@@ -1,0 +1,53 @@
+<div fxLayout="column">
+	<div class="flex-p">
+		<div fxLayout="row" fxLayoutAlign="space-between center">
+			<h3 class="muted-text">城市总数: {{totalCities}}</h3>
+		</div>
+		<app-select-date [selectType]="'correct'" [dateType]="dateType" (sendData)="changeDate($event)"></app-select-date>
+
+		<table mat-table [dataSource]="dataSource" multiTemplateDataRows class="mat-elevation-z8 w-100">
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef> No </th>
+				<td mat-cell *matCellDef="let element;"> {{element.index + 1}} </td>
+			</ng-container>
+			<ng-container matColumnDef="name">
+				<th mat-header-cell *matHeaderCellDef> 
+					城市名称
+				</th>
+				<td mat-cell *matCellDef="let element;"> {{element.name}} </td>
+			</ng-container>
+			<ng-container matColumnDef="dustAAmount">
+				<th mat-header-cell *matHeaderCellDef> {{ dustName[0]? dustName[0] : 'A' }}重量 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.dustAAmount | currency:'USD':'':'1.1-1'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="dustBAmount">
+				<th mat-header-cell *matHeaderCellDef> {{ dustName[1]? dustName[1] : 'B' }}重量 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.dustBAmount | currency:'USD':'':'1.1-1'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="totalPoint">
+				<th mat-header-cell *matHeaderCellDef> 总积分 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.totalPoint | currency:'USD':'':'1.2-2'}}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="operationCnt">
+				<th mat-header-cell *matHeaderCellDef> 投放次数 </th>
+				<td mat-cell *matCellDef="let element">
+					{{element.operationCnt}}
+				</td>
+			</ng-container>
+		
+			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+			<tr mat-row *matRowDef="let element; columns: displayedColumns;" class="example-element-row"
+				[style.background]="(element.index % 2)? '#F0F0F0' : ''">
+			</tr>
+		</table>
+		<mat-paginator #paginator [pageSize]="10" [length]="totalCnt" [pageIndex]="pageIndex"
+			[pageSizeOptions]="[10, 20, 50, 100]" [showFirstLastButtons]="true" (page)="getCitiesReport($event)">
+		</mat-paginator>
+	</div>
+</div>

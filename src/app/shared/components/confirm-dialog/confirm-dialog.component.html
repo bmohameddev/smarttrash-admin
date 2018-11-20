@@ -1,0 +1,11 @@
+<div class="alert_dialog_wrap" fxLayout="column" fxLayoutAlign="space-between center">
+	<div class="alert_dialog_title"> {{data.content}} </div>
+	<div class="alert_dialog_button_wrap" fxLayout="row">
+		<div>
+			<button mat-raised-button color="accent" (click)="close('ok')"> 确认 </button>
+		</div>
+		<div>
+			<button mat-raised-button color="warn" (click)="close('cancel')"> 取消 </button>
+		</div>
+	</div>
+</div>

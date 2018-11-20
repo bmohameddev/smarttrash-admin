@@ -1,0 +1,28 @@
+.video-player {
+    height: 220px;
+    max-width: 400px;
+}
+
+.upload-spinner {
+    position: absolute;
+    transform: translate(0px, -20px);
+}
+
+.audio-item {
+    button {
+        display: none;
+    }
+    &:hover {
+        background-color: #E0E0E0;
+        button {
+            display: unset !important;
+        }
+    }
+    &.selected {
+        background-color: #E0E0E0;
+    }
+}
+
+.custom-slider {
+    height: 56.56px;
+}

@@ -1,0 +1,360 @@
+<div fxLayout="column">
+    <div class="flex-p">
+        <div fxLayout="row wrap" fxLayoutAlign="space-between center">
+            <h2 [class.green]="dustType == 0" [class.accent]="dustType == 2">{{dustName[dustType]?
+                dustName[dustType] : ''}}</h2>
+        </div>
+        <div fxLayout="row wrap" fxLayoutAlign="start center" class="mb-075">
+            <form [formGroup]="searchForm" fxFlex fxLayout="row"
+                fxLayoutAlign="start center">
+                <mat-form-field class="custom-form-field pb0-form-filed mr-05
+                    w-160p" appearance="outline">
+                    <mat-label> 姓名或卡号&nbsp;&nbsp; </mat-label>
+                    <button mat-icon-button matSuffix (click)="applySearch()">
+                        <mat-icon>search</mat-icon>
+                    </button>
+                    <input matInput formControlName="keyword"
+                        (change)="applySearch()">
+                </mat-form-field>
+                <mat-form-field class="custom-form-field pb0-form-filed mr-05
+                    w-160p" appearance="outline">
+                    <mat-label> 开始日期 </mat-label>
+                    <input matInput [matDatepicker]="startDate"
+                        formControlName="startDate"
+                        (dateChange)="applySearch()">
+                    <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                    <mat-datepicker #startDate></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field class="custom-form-field pb0-form-filed mr-05
+                    w-160p" appearance="outline">
+                    <mat-label> 结束日期 </mat-label>
+                    <input matInput [matDatepicker]="endDate"
+                        formControlName="endDate" (dateChange)="applySearch()">
+                    <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+                    <mat-datepicker #endDate></mat-datepicker>
+                </mat-form-field>
+                <!-- <div fxLayout="row" fxLayoutAlign="start center" class="custom-control-wrap mr-05">
+                    <span class="label">垃圾类型</span>
+                    <div>
+                        <mat-checkbox formControlName="dustA" (change)="applySearch()">
+                            {{dustName[0]? dustName[0] : '垃圾A'}}
+                        </mat-checkbox>
+                    </div>
+                    <div>
+                        <mat-checkbox formControlName="dustB" (change)="applySearch()">
+                            {{dustName[1]? dustName[1] : '垃圾B'}}
+                        </mat-checkbox>
+                    </div>
+                </div> -->
+                <div fxLayout="row" fxLayoutAlign="start center"
+                    class="custom-control-wrap">
+                    <span class="label">扣除积分</span>
+                    <div>
+                        <mat-checkbox formControlName="notHaveDeduction"
+                            (change)="applySearch()">
+                            没有扣除积分
+                        </mat-checkbox>
+                    </div>
+                    <div>
+                        <mat-checkbox formControlName="haveDeduction"
+                            (change)="applySearch()">
+                            有扣除积分
+                        </mat-checkbox>
+                    </div>
+                </div>
+            </form>
+            <div *ngIf="commonData.city.topAdmin == user.id || user.role ==
+                'SUPER'" fxLayout="row" fxLayoutAlign="start center">
+                <button mat-stroked-button color="accent" class="mr-025"
+                    (click)="export('xlsx')"> 导 出 </button>
+                <button mat-stroked-button color="accent" class="mr-05"
+                    (click)="print()"> 打 印 </button>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="start center" class="fs-16
+                muted-text">
+                <div *ngIf="state == 'PASS'">
+                    合格 : <span class="accent bold">{{cntList['PASS']?
+                        cntList['PASS'] : 0}}</span>&nbsp;&nbsp;&nbsp;
+                    参与人次 : <span class="accent bold">{{userCnt? userCnt : 0}}</span>&nbsp;&nbsp;&nbsp;
+                    合格率 : <span class="accent bold">
+                        {{((cntList['PASS']? cntList['PASS'] : 0) * 100/
+                        (cntList['TOTAL']? cntList['TOTAL'] : 1))|
+                        currency:'USD':'':'1.1-1'}}%
+                    </span>&nbsp;&nbsp;&nbsp;
+                </div>
+                <div *ngIf="state == 'FAIL'">
+                    不合格 : <span class="accent bold">{{cntList['FAIL']?
+                        cntList['FAIL'] : 0}}</span>&nbsp;&nbsp;&nbsp;
+                    不合格率 : <span class="accent bold">
+                        {{((cntList['FAIL']? cntList['FAIL'] : 0) * 100/
+                        (cntList['TOTAL']? cntList['TOTAL'] : 1))|
+                        currency:'USD':'':'1.1-1'}}%
+                    </span>&nbsp;&nbsp;&nbsp;
+                </div>
+                <div *ngIf="state == 'EMPTY'">
+                    空桶 : <span class="accent bold">{{cntList['EMPTY']?
+                        cntList['EMPTY'] : 0}}</span>&nbsp;&nbsp;&nbsp;
+                    空桶率 : <span class="accent bold">
+                        {{((cntList['EMPTY']? cntList['EMPTY'] : 0) * 100/
+                        (cntList['TOTAL']? cntList['TOTAL'] : 1))|
+                        currency:'USD':'':'1.1-1'}}%
+                    </span>&nbsp;&nbsp;&nbsp;
+                </div>
+                <div>
+                    全部 : <span class="accent bold">{{cntList['TOTAL']?
+                        cntList['TOTAL'] : 0}}</span>&nbsp;&nbsp;&nbsp;
+                </div>
+                <button mat-raised-button color="accent" (click)="state= 'PASS';
+                    applySearch();" class="ml-025" *ngIf="!state">
+                    合格
+                </button>
+                <button mat-raised-button color="warn" (click)="state= 'FAIL';
+                    applySearch();" class="ml-025" *ngIf="!state">
+                    不合格
+                </button>
+                <button mat-raised-button color="primary" (click)="state=
+                    'EMPTY'; applySearch();" class="ml-025" *ngIf="!state">
+                    空桶
+                </button>
+                <button mat-stroked-button (click)="state= ''; applySearch();"
+                    class="ml-05" *ngIf="state">
+                    返回
+                </button>
+            </div>
+        </div>
+        <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows
+            class="mat-elevation-z8 w-100"
+            (matSortChange)="customSort($event)">
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() &&
+                        !isAllSelected()">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox (click)="$event.stopPropagation()"
+                        (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="index">
+                <th mat-header-cell *matHeaderCellDef> No </th>
+                <td mat-cell *matCellDef="let element;"> {{element.index + 1}}</td>
+            </ng-container>
+            <ng-container matColumnDef="userName">
+                <th mat-header-cell *matHeaderCellDef> 用户 </th>
+                <td mat-cell *matCellDef="let element"> {{element.user.name}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="cardId">
+                <th mat-header-cell *matHeaderCellDef> 卡号 </th>
+                <td mat-cell *matCellDef="let element"> {{element.cardId}} </td>
+            </ng-container>
+            <ng-container matColumnDef="dustName">
+                <th mat-header-cell *matHeaderCellDef> 垃圾名称 </th>
+                <td mat-cell *matCellDef="let element">
+                    {{dustName[element.dustType]}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef> 重量 </th>
+                <td mat-cell *matCellDef="let element"> {{element.amount |
+                    currency:'USD':'':'1.1-1'}} </td>
+            </ng-container>
+            <ng-container matColumnDef="picture">
+                <th mat-header-cell *matHeaderCellDef> 现场照片 </th>
+                <td mat-cell *matCellDef="let element">
+                    <div class="inline-trashlog-picture">
+                        <!-- <img (click)="openPicture(element)" [src]="element?.pictureUrl? 
+                            serverUrl+'/'+element.pictureUrl : 'assets/img/extra/empty-image.png'" 
+                            class="transition-2 pointer"> -->
+                        <img [defaultImage]="'assets/img/extra/empty-image.png'"
+                            [lazyLoad]="serverUrl + '/' + element.pictureUrl"
+                            (click)="openPicture(element)">
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="calcPoint">
+                <th mat-header-cell *matHeaderCellDef> 对应积分 </th>
+                <td mat-cell *matCellDef="let element">
+                    {{element.point | currency:'USD':'':'1.2-2'}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="state">
+                <th mat-header-cell *matHeaderCellDef> 状态 </th>
+                <td mat-cell *matCellDef="let element">
+                    <span *ngIf="element.state == 'PENDING'" fxLayout="row"
+                        fxLayoutAlign="start center">
+                        <mat-icon color="accent">schedule</mat-icon>
+                        <span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;未处理</span>
+                    </span>
+                    <span *ngIf="element.state == 'PASS'" fxLayout="row"
+                        fxLayoutAlign="start center">
+                        <mat-icon color="primary">check_circle_outline</mat-icon>
+                        <span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;合格</span>
+                    </span>
+                    <span *ngIf="element.state == 'FAIL'" fxLayout="row"
+                        fxLayoutAlign="start center">
+                        <mat-icon color="warn">highlight_off</mat-icon>
+                        <span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;不合格</span>
+                    </span>
+                    <span *ngIf="element.state == 'EMPTY'" fxLayout="row"
+                        fxLayoutAlign="start center">
+                        <mat-icon color="warn">cloud_queue</mat-icon>
+                        <span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;空桶</span>
+                    </span>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> 创建时间
+                </th>
+                <td mat-cell *matCellDef="let element"> {{element.createdAt |
+                    date:"yy.MM.dd-HH:mm:ss"}} </td>
+            </ng-container>
+            <ng-container matColumnDef="point">
+                <th mat-header-cell *matHeaderCellDef> 获得积分 </th>
+                <td mat-cell *matCellDef="let element">
+                    {{element.state == 'PASS'? (element.point |
+                    currency:'USD':'':'1.2-2') : '0.00'}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="deviceType">
+                <th mat-header-cell *matHeaderCellDef> 自动/手动 </th>
+                <td mat-cell *matCellDef="let element">
+                    <mat-chip-list>
+                        <mat-chip
+                            *ngIf="element.deviceType == 'AUTO'"
+                            class="mat-small-chip"
+                            color="primary"
+                            selected="true">
+                            自动
+                        </mat-chip>
+                        <mat-chip
+                            *ngIf="element.deviceType == 'MANUAL'"
+                            class="mat-small-chip"
+                            color="accent"
+                            selected="true">
+                            手动
+                        </mat-chip>
+                    </mat-chip-list>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="deductionPoint">
+                <th mat-header-cell *matHeaderCellDef> 扣除积分 </th>
+                <td mat-cell *matCellDef="let element">
+                    {{element.deductionPoint | currency:'USD':'':'1.1-1'}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="reviewAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> 审核评定日期
+                </th>
+                <td mat-cell *matCellDef="let element"> {{(element.reviewAt?
+                    element.reviewAt : '') | date:"yy.MM.dd-HH:mm:ss"}} </td>
+            </ng-container>
+            <ng-container matColumnDef="reviewer">
+                <th mat-header-cell *matHeaderCellDef class="text-center"
+                    style="width: 124px;"> 审核评定人(收集员) </th>
+                <td mat-cell *matCellDef="let element">
+                    <div fxLayout="row" fxLayoutAlign="center center">
+                        <mat-chip-list>
+                            <mat-chip *ngIf="element.reviewer"
+                                class="mat-admin-chip"
+                                color="primary"
+                                selected="true">
+                                <img
+                                    [defaultImage]="'assets/img/extra/user.svg'"
+                                    [lazyLoad]="element.reviewer?.profilePicture?
+                                    serverUrl+'/' +
+                                    element.reviewer.profilePicture: ''">
+                                <span>{{element.reviewer.name}}</span>
+                            </mat-chip>
+                            <mat-chip *ngIf="element.collector"
+                                class="mat-admin-chip"
+                                color="accent"
+                                selected="true">
+                                <img
+                                    [defaultImage]="'assets/img/extra/user.svg'"
+                                    [lazyLoad]="element.collector?.profilePicture?
+                                    serverUrl+'/' +
+                                    element.collector.profilePicture: ''">
+                                <span>{{element.collector.name}}</span>
+                            </mat-chip>
+                        </mat-chip-list>
+                    </div>
+                </td>
+            </ng-container>
+            <!-- <ng-container matColumnDef="deviceId">
+                <th mat-header-cell *matHeaderCellDef> 	设备ID </th>
+                <td mat-cell *matCellDef="let element"> {{element.trash.deviceId}} </td>
+            </ng-container> -->
+            <ng-container matColumnDef="menu">
+                <th mat-header-cell *matHeaderCellDef class="text-center"> 操作
+                </th>
+                <td mat-cell *matCellDef="let element" class="text-center">
+                    <button mat-icon-button [matMenuTriggerFor]="menu"
+                        #menuTrigger="matMenuTrigger"
+                        (click)="$event.stopPropagation()">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu" xPosition="before"
+                        overlapTrigger="true">
+                        <span (mouseleave)="menuTrigger.closeMenu()">
+                            <!-- <button mat-menu-item (click)="editTrashlog(element, element._id);">
+                                <mat-icon>edit</mat-icon>
+                                <span>编辑</span>
+                            </button> -->
+                            <button mat-menu-item
+                                (click)="changeTrashlogState(element.id,
+                                'PASS')">
+                                <mat-icon color="primary"> check_circle_outline
+                                </mat-icon>
+                                <span> 合格 </span>
+                            </button>
+                            <button mat-menu-item
+                                (click)="changeTrashlogState(element.id,
+                                'FAIL')">
+                                <mat-icon color="warn"> highlight_off
+                                </mat-icon>
+                                <span> 不合格 </span>
+                            </button>
+                            <button mat-menu-item
+                                (click)="changeTrashlogState(element.id,
+                                'EMPTY')">
+                                <mat-icon color="warn"> cloud_queue </mat-icon>
+                                <span> 空桶 </span>
+                            </button>
+                            <!-- <button mat-menu-item (click)="changeTrashlogState(element.id, 'PENDING')">
+                                <mat-icon color="accent"> schedule </mat-icon>
+                                <span> 未处理 </span>
+                            </button> -->
+                            <button mat-menu-item
+                                (click)="deductPoint(element)">
+                                <mat-icon color="warn"> remove_circle_outline
+                                </mat-icon>
+                                <span> 积分扣除 </span>
+                            </button>
+                        </span>
+                    </mat-menu>
+                </td>
+            </ng-container>
+            <tr mat-header-row
+                *matHeaderRowDef="commonService.isMediaActive('gt-xs')?
+                displayedColumns: displayedColumnsMobile"></tr>
+            <tr mat-row
+                *matRowDef="let element; columns:
+                commonService.isMediaActive('gt-xs')? displayedColumns:
+                displayedColumnsMobile;"
+                class="example-element-row"
+                [style.background]="(element.index % 2)? '#F0F0F0' : ''">
+            </tr>
+        </table>
+        <mat-paginator #paginator [pageSize]="10" [length]="totalCnt"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="[10, 20, 50, 100]" [showFirstLastButtons]="true"
+            (page)="getTrashLogs($event)">
+        </mat-paginator>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+<mat-sidenav-container>
+
+    <div fxLayout="row" fxLayoutAlign="center center" class="h-100">
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit(form.value)" fxFlex="80" fxFlex.gt-sm="30" fxFlex.sm="60"
+            autocomplete="off">
+
+            <mat-card class="p-0 mat-elevation-z24 box">
+                <div fxLayout="column" fxLayoutAlign="center center" class="bg-primary box-header">
+                    <button mat-fab color="accent" class="mat-elevation-z12" (click)="onSubmit(form.value);">
+                        <mat-icon>exit_to_app</mat-icon>
+                    </button>
+                </div>
+                <mat-card-content fxLayout="column" fxLayoutAlign="end center" class="box-content">
+                    <mat-card fxLayout="column" fxLayoutAlign="center center"
+                        class="mat-elevation-z12 box-content-inner">
+                        <span class="box-content-header">登录</span>
+                        <mat-form-field class="w-100">
+                            <input matInput placeholder="姓名" formControlName="name">
+                            <mat-error *ngIf="form.controls.name.errors?.required">必须填写</mat-error>
+                        </mat-form-field>
+                        <mat-form-field class="w-100">
+                            <input matInput placeholder="密码" formControlName="password"
+                                [type]="passwordHide ? 'password' : 'text'">
+                            <mat-icon matSuffix (click)="passwordHide = !passwordHide">
+                                {{passwordHide ? 'visibility' : 'visibility_off'}}</mat-icon>
+                            <mat-error *ngIf="form.controls.password.errors?.required">必须填写</mat-error>
+                            <mat-error *ngIf="form.controls.password.hasError('minlength')">
+                                密码不得小于8位
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="w-100" fxLayout="row">
+                            <mat-form-field fxFlex="60">
+                                <input matInput placeholder="验证码" formControlName="captcha">
+                                <mat-error *ngIf="form.controls.captcha.errors?.required">必须填写</mat-error>
+                            </mat-form-field>
+                            <div fxFlex="40">
+                                <img *ngIf="captchaImg" [src]="captchaImg" alt="captchaImg" style="height: 50px;">
+                            </div>
+                        </div>
+                    </mat-card>
+                    <button mat-raised-button color="primary" class="mat-elevation-z12 box-button" type="submit"
+                        [disabled]="submitted || form.invalid">
+                        登录
+                    </button>
+                </mat-card-content>
+            </mat-card>
+
+        </form>
+
+    </div>
+
+</mat-sidenav-container>

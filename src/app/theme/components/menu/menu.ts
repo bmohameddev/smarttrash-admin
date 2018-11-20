@@ -1,0 +1,38 @@
+import { Menu } from './menu.model';
+
+export const verticalMenuItems = [
+	new Menu(1, '首页', '/', null, null, 'dashboard', null, false, 0, ''),
+	new Menu(2, '设备管理', '/trashes/list', null, null, 'delete_outline', null, false, 0, ''),
+	new Menu(3, '用户管理', '/users/list', null, null, 'people', null, false, 0, ''),
+	new Menu(4, '收集员管理', null, null, null, 'people_outline', null, true, 0, ''),
+	new Menu(41, '收集员列表', '/collectors', null, null, 'list', null, false, 4, ''),
+	new Menu(41, '收集员考勤', '/collectors/attendance', null, null, 'trending_up', null, false, 4, ''),
+	new Menu(5, '垃圾分类管理', '/trashlog', null, null, 'history', null, true, 0, ''),
+	new Menu(51, '餐厨垃圾', '/trashlog', { dustType: '0' }, null, '', null, false, 5, ''),
+	new Menu(52, '其他垃圾', '/trashlog', { dustType: '1' }, null, '', null, false, 5, ''),
+	new Menu(53, '可回收垃圾', null, null, null, '', null, true, 5, ''),
+	new Menu(531, '塑料', '/trashlog', { dustType: '2' }, null, '', null, false, 53, ''),
+	new Menu(532, '铁', '/trashlog', { dustType: '2' }, null, '', null, false, 53, ''),
+	new Menu(533, '纸', '/trashlog', { dustType: '2' }, null, '', null, false, 53, ''),
+	new Menu(534, '衣物', '/trashlog', { dustType: '2' }, null, '', null, false, 53, ''),
+	new Menu(535, '瓶', '/trashlog', { dustType: '2' }, null, '', null, false, 53, ''),
+	new Menu(60, '城市管理', null, null, null, 'location_city', null, true, 0, 'ADMIN'),
+	new Menu(61, '地图', '/maps', null, null, 'location_on', null, false, 60, 'ADMIN'),
+	new Menu(62, '城市设置', '/citysetting', null, null, 'settings', null, false, 60, 'TOP'),
+	new Menu(70, '报表统计', null, null, null, 'trending_up', null, true, 0, ''),
+	new Menu(71, '垃圾统计', '/report/city', null, null, 'assignment_turned_in', null, false, 70, ''),
+	new Menu(72, '用户统计', null, null, null, 'perm_identity', null, true, 70, ''),
+	new Menu(721, '居民统计', '/report/user', null, null, 'people_outline', null, false, 72, ''),
+	new Menu(722, '兑换处统计', '/report/exchanger', null, null, 'account_balance', null, false, 72, 'ADMIN'),
+	new Menu(73, '设备统计', '/report/trash', null, null, 'delete_outline', null, false, 70, ''),
+	new Menu(74, '城市统计', '/report/cities', null, null, 'location_city', null, false, 70, 'SUPER'),
+	new Menu(80, '积分兑换记录', null, null, null, 'attach_money', null, true, 0, ''),
+	new Menu(81, '居民兑换记录', '/withdraw', null, null, 'people_outline', null, false, 80, ''),
+	new Menu(82, '兑换处兑换记录', '/payment', null, null, 'account_balance', null, false, 80, ''),
+	new Menu(90, '商品管理', '/products', null, null, 'shopping_cart', null, false, 0, 'ADMIN'),
+	new Menu(100, '管理员管理', '/admins', null, null, 'people_outline', null, false, 0, 'SUPER'),
+	new Menu(110, '城市管理', '/cities', null, null, 'location_city', null, false, 0, 'SUPER'),
+	new Menu(120, '设置', '/setting', null, null, 'settings', null, false, 0, 'SUPER'),
+];
+
+export const horizontalMenuItems = [];

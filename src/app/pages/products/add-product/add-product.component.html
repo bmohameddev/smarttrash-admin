@@ -1,0 +1,26 @@
+<form [formGroup]="infoForm" (ngSubmit)="submitForm()" autocomplete="off" novalidate>
+    <div class="p-1" fxLayoutAlign="space-between center">
+        <h1 mat-dialog-title class="m-0">{{product && product.id? '编辑' : '添加'}}商品</h1>
+        <button mat-icon-button mat-dialog-close tabindex="-1">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <div fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutAlign="space-between space-between"
+            class="form-field-outer">
+            <mat-form-field fxFlex="100">
+                <input matInput placeholder="名称" formControlName="name">
+                <mat-error *ngIf="infoForm.controls.name.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field class="w-100">
+                <input matInput numeric numericType="decimal" placeholder="积分" formControlName="point">
+                <mat-error *ngIf="infoForm.controls.point.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+        </div>
+    </div>
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end center">
+        <button mat-raised-button color="primary" [disabled]="!infoForm.valid || submitted" type="submit">
+            <span> 保 存 </span>
+        </button>
+    </div>
+</form>

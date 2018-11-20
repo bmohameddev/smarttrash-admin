@@ -1,0 +1,90 @@
+<div fxLayout="column">
+	<div class="flex-p">
+		<div fxLayout="row" fxLayoutAlign="space-between end" class="mb-075">
+			<div fxLayout="row"></div>
+			<div
+				*ngIf="commonData.city.topAdmin == user.id || user.role == 'SUPER'"
+				fxLayout="row"
+				fxLayoutAlign="space-between center"
+			>
+				<button
+					mat-stroked-button
+					color="primary"
+					class="list-top-btn"
+					(click)="addUsers()"
+					[disabled]="submitted"
+				>
+					添加用户
+				</button>
+			</div>
+		</div>
+		<table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows class="mat-elevation-z8 w-100">
+			<ng-container matColumnDef="select">
+				<th mat-header-cell *matHeaderCellDef>
+					<mat-checkbox
+						(change)="$event ? masterToggle() : null"
+						[checked]="selection.hasValue() && isAllSelected()"
+						[indeterminate]="selection.hasValue() && !isAllSelected()"
+					>
+					</mat-checkbox>
+				</th>
+				<td mat-cell *matCellDef="let row">
+					<mat-checkbox
+						(click)="$event.stopPropagation()"
+						(change)="$event ? selection.toggle(row) : null"
+						[checked]="selection.isSelected(row)"
+					>
+					</mat-checkbox>
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef>No</th>
+				<td mat-cell *matCellDef="let element">{{ element.index + 1 }}</td>
+			</ng-container>
+			<ng-container matColumnDef="name">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header>姓名</th>
+				<td mat-cell *matCellDef="let element">
+					<input type="text" [(ngModel)]="element.name" class="custom-input" />
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="cardIds">
+				<th mat-header-cell *matHeaderCellDef>卡号</th>
+				<td mat-cell *matCellDef="let element">{{ element.cardIds }}</td>
+			</ng-container>
+			<ng-container matColumnDef="phone">
+				<th mat-header-cell *matHeaderCellDef>电话号</th>
+				<td mat-cell *matCellDef="let element">
+					<input type="text" [(ngModel)]="element.phone" class="custom-input" />
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="city">
+				<th mat-header-cell *matHeaderCellDef>城市</th>
+				<td mat-cell *matCellDef="let element">
+					{{ element.city ? element.city.name : '' }}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="address">
+				<th mat-header-cell *matHeaderCellDef>详细地址</th>
+				<td mat-cell *matCellDef="let element">
+					<input type="text" [(ngModel)]="element.address" class="custom-input" />
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="createStatus">
+				<th mat-header-cell *matHeaderCellDef>添加状态</th>
+				<td mat-cell *matCellDef="let element">
+					<span *ngIf="element.createStatus && element.createStatus == 'OK'" class="accent">成功</span>
+					<span *ngIf="element.createStatus && element.createStatus != 'OK'" class="red">{{
+						element.createStatus
+					}}</span>
+				</td>
+			</ng-container>
+			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+			<tr
+				mat-row
+				*matRowDef="let element; columns: displayedColumns"
+				class="example-element-row"
+				[style.background]="element.index % 2 ? '#F0F0F0' : ''"
+			></tr>
+		</table>
+	</div>
+</div>

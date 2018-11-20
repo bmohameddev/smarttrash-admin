@@ -1,0 +1,703 @@
+<div [class.dashboard-wrap]="commonService.isMediaActive('gt-xs')" fxLayout="column">
+	<div class="flex-p">
+		<h2 class="title">
+			{{ siteName ? siteName : '建德智能垃圾桶管理系统' }}
+		</h2>
+	</div>
+	<div fxLayout="row wrap" fxFlex>
+		<div fxFlex="100" fxFlex.gt-sm="35" fxLayout="column">
+			<div class="flex-p" fxFlex="35">
+				<mat-card
+					class="main-box-shadow chart-card pointer"
+					[routerLink]="user.role == 'SUPER' ? '/report/cities/date' : '/report/city/date'"
+				>
+					<mat-card-header fxLayoutAlign="center center">
+						<mat-card-subtitle>
+							<h2>分类垃圾投放日报表</h2>
+						</mat-card-subtitle>
+						<ng-container *ngTemplateOutlet="legend"></ng-container>
+					</mat-card-header>
+					<div class="chart-wrap">
+						<ngx-charts-line-chart
+							[scheme]="colorScheme"
+							[results]="dateReport"
+							[gradient]="gradient"
+							[xAxis]="showXAxis"
+							[yAxis]="showYAxis"
+							[legend]="showLegend"
+							[showXAxisLabel]="showXAxisLabel"
+							[showYAxisLabel]="showYAxisLabel"
+							[xAxisLabel]="xAxisLabel"
+							[yAxisLabel]="yAxisLabel"
+							[legendTitle]="legendTitle"
+							[legendPosition]="legendPosition"
+						>
+						</ngx-charts-line-chart>
+					</div>
+				</mat-card>
+			</div>
+
+			<div class="flex-p pointer" routerLink="/trashlog" [queryParams]="{ dustType: 0 }">
+				<table
+					mat-table
+					[dataSource]="dataSourceTrashLogANull"
+					matSort
+					multiTemplateDataRows
+					class="mat-elevation-z8 w-100 main-box-shadow"
+				>
+					<ng-container matColumnDef="index">
+						<th mat-header-cell *matHeaderCellDef class="pl-0 text-center">No</th>
+						<td mat-cell *matCellDef="let element" class="pl-0 text-center"></td>
+					</ng-container>
+					<ng-container matColumnDef="userName">
+						<th mat-header-cell *matHeaderCellDef class="username-wrap">用户</th>
+						<td mat-cell *matCellDef="let element" class="username-wrap"></td>
+					</ng-container>
+					<ng-container matColumnDef="dustName">
+						<th mat-header-cell *matHeaderCellDef>垃圾名称</th>
+						<td mat-cell *matCellDef="let element"></td>
+					</ng-container>
+					<ng-container matColumnDef="amount">
+						<th mat-header-cell *matHeaderCellDef>重量</th>
+						<td mat-cell *matCellDef="let element"></td>
+					</ng-container>
+					<ng-container matColumnDef="picture">
+						<th mat-header-cell *matHeaderCellDef class="text-center">现场照片</th>
+						<td mat-cell *matCellDef="let element" class="text-center"></td>
+					</ng-container>
+					<ng-container matColumnDef="calcPoint">
+						<th mat-header-cell *matHeaderCellDef class="text-center">对应积分</th>
+						<td mat-cell *matCellDef="let element" class="text-center"></td>
+					</ng-container>
+					<ng-container matColumnDef="state">
+						<th mat-header-cell *matHeaderCellDef class="text-center">状态</th>
+						<td mat-cell *matCellDef="let element" class="text-center"></td>
+					</ng-container>
+					<ng-container matColumnDef="createdAt">
+						<th mat-header-cell *matHeaderCellDef mat-sort-header>创建时间</th>
+						<td mat-cell *matCellDef="let element"></td>
+					</ng-container>
+					<ng-container matColumnDef="deviceType">
+						<th mat-header-cell *matHeaderCellDef class="pr-0 text-center">自动/手动</th>
+						<td mat-cell *matCellDef="let element" class="pr-0"></td>
+					</ng-container>
+					<tr mat-header-row *matHeaderRowDef="displayedColumnsTrashLog"></tr>
+					<tr
+						mat-row
+						*matRowDef="let element; columns: displayedColumnsTrashLog"
+						[style.background]="element?.index % 2 ? '#F0F0F0' : ''"
+					></tr>
+				</table>
+				<div style="height: 192px; overflow: hidden; scroll-behavior: smooth" #trashlogsA>
+					<table
+						mat-table
+						[dataSource]="dataSourceTrashLogA"
+						matSort
+						multiTemplateDataRows
+						class="mat-elevation-z8 w-100 main-box-shadow"
+					>
+						<ng-container matColumnDef="index">
+							<th mat-header-cell *matHeaderCellDef class="pl-0 text-center">No</th>
+							<td mat-cell *matCellDef="let element" class="pl-0 text-center">
+								{{ element ? element.index + 1 : '' }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="userName">
+							<th mat-header-cell *matHeaderCellDef class="username-wrap">用户</th>
+							<td mat-cell *matCellDef="let element" class="username-wrap">
+								{{ element.user.name }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="dustName">
+							<th mat-header-cell *matHeaderCellDef>垃圾名称</th>
+							<td mat-cell *matCellDef="let element">
+								<span [class.green]="element.dustType == 0" [class.accent]="element.dustType == 2">
+									{{ element ? dustName[element.dustType] : '' }}
+								</span>
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="amount">
+							<th mat-header-cell *matHeaderCellDef>重量</th>
+							<td mat-cell *matCellDef="let element">
+								{{ element?.amount | currency: 'USD':'':'1.1-1' }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="picture">
+							<th mat-header-cell *matHeaderCellDef class="text-center">现场照片</th>
+							<td mat-cell *matCellDef="let element" class="text-center">
+								<div class="inline-trashlog-picture">
+									<img
+										[defaultImage]="'assets/img/extra/empty-image.png'"
+										[lazyLoad]="serverUrl + '/' + element.pictureUrl"
+										(click)="openPicture(element)"
+									/>
+								</div>
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="calcPoint">
+							<th mat-header-cell *matHeaderCellDef class="text-center">对应积分</th>
+							<td mat-cell *matCellDef="let element" class="text-center">
+								{{ element?.point | currency: 'USD':'':'1.2-2' }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="state">
+							<th mat-header-cell *matHeaderCellDef class="text-center">状态</th>
+							<td mat-cell *matCellDef="let element" class="text-center">
+								<span *ngIf="element?.state == 'PENDING'" fxLayout="row" fxLayoutAlign="center center">
+									<mat-icon color="accent">schedule</mat-icon>
+									<span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;未处理</span>
+								</span>
+								<span *ngIf="element?.state == 'PASS'" fxLayout="row" fxLayoutAlign="center center">
+									<mat-icon color="primary">check_circle_outline</mat-icon>
+									<span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;合格</span>
+								</span>
+								<span *ngIf="element?.state == 'FAIL'" fxLayout="row" fxLayoutAlign="center center">
+									<mat-icon color="warn">highlight_off</mat-icon>
+									<span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;不合格</span>
+								</span>
+								<span *ngIf="element?.state == 'EMPTY'" fxLayout="row" fxLayoutAlign="center center">
+									<mat-icon color="warn">cloud_queue</mat-icon>
+									<span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;空桶</span>
+								</span>
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="createdAt">
+							<th mat-header-cell *matHeaderCellDef mat-sort-header>创建时间</th>
+							<td mat-cell *matCellDef="let element">
+								{{ element?.createdAt ? (element.createdAt | date: 'yyyy.MM.dd - HH:mm:ss') : '' }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="deviceType">
+							<th mat-header-cell *matHeaderCellDef class="pr-0 text-center">自动/手动</th>
+							<td mat-cell *matCellDef="let element" class="pr-0">
+								<mat-chip-list class="center">
+									<mat-chip
+										*ngIf="element.deviceType == 'AUTO'"
+										class="mat-small-chip"
+										color="primary"
+										selected="true"
+									>
+										自动
+									</mat-chip>
+									<mat-chip
+										*ngIf="element.deviceType == 'MANUAL'"
+										class="mat-small-chip"
+										color="accent"
+										selected="true"
+									>
+										手动
+									</mat-chip>
+								</mat-chip-list>
+							</td>
+						</ng-container>
+						<tr mat-header-row *matHeaderRowDef="displayedColumnsTrashLog" class="display-none"></tr>
+						<tr
+							mat-row
+							*matRowDef="let element; columns: displayedColumnsTrashLog"
+							[style.background]="element?.index % 2 ? '#F0F0F0' : ''"
+						></tr>
+					</table>
+				</div>
+			</div>
+
+			<div class="flex-p pointer" routerLink="/trashlog" [queryParams]="{ dustType: 1 }">
+				<table
+					mat-table
+					[dataSource]="dataSourceTrashLogBNull"
+					matSort
+					multiTemplateDataRows
+					class="mat-elevation-z8 w-100 main-box-shadow"
+				>
+					<ng-container matColumnDef="index">
+						<th mat-header-cell *matHeaderCellDef class="pl-0 text-center">No</th>
+						<td mat-cell *matCellDef="let element" class="pl-0 text-center"></td>
+					</ng-container>
+					<ng-container matColumnDef="userName">
+						<th mat-header-cell *matHeaderCellDef class="username-wrap">用户</th>
+						<td mat-cell *matCellDef="let element" class="username-wrap"></td>
+					</ng-container>
+					<ng-container matColumnDef="dustName">
+						<th mat-header-cell *matHeaderCellDef>垃圾名称</th>
+						<td mat-cell *matCellDef="let element"></td>
+					</ng-container>
+					<ng-container matColumnDef="amount">
+						<th mat-header-cell *matHeaderCellDef>重量</th>
+						<td mat-cell *matCellDef="let element"></td>
+					</ng-container>
+					<ng-container matColumnDef="picture">
+						<th mat-header-cell *matHeaderCellDef class="text-center">现场照片</th>
+						<td mat-cell *matCellDef="let element" class="text-center"></td>
+					</ng-container>
+					<ng-container matColumnDef="calcPoint">
+						<th mat-header-cell *matHeaderCellDef class="text-center">对应积分</th>
+						<td mat-cell *matCellDef="let element" class="text-center"></td>
+					</ng-container>
+					<ng-container matColumnDef="state">
+						<th mat-header-cell *matHeaderCellDef class="text-center">状态</th>
+						<td mat-cell *matCellDef="let element" class="text-center"></td>
+					</ng-container>
+					<ng-container matColumnDef="createdAt">
+						<th mat-header-cell *matHeaderCellDef mat-sort-header>创建时间</th>
+						<td mat-cell *matCellDef="let element"></td>
+					</ng-container>
+					<ng-container matColumnDef="deviceType">
+						<th mat-header-cell *matHeaderCellDef class="pr-0 text-center">自动/手动</th>
+						<td mat-cell *matCellDef="let element" class="pr-0"></td>
+					</ng-container>
+					<tr mat-header-row *matHeaderRowDef="displayedColumnsTrashLog"></tr>
+					<tr
+						mat-row
+						*matRowDef="let element; columns: displayedColumnsTrashLog"
+						[style.background]="element?.index % 2 ? '#F0F0F0' : ''"
+					></tr>
+				</table>
+				<div style="height: 192px; overflow: hidden; scroll-behavior: smooth" #trashlogsB>
+					<table
+						mat-table
+						[dataSource]="dataSourceTrashLogB"
+						matSort
+						multiTemplateDataRows
+						class="mat-elevation-z8 w-100 main-box-shadow"
+					>
+						<ng-container matColumnDef="index">
+							<th mat-header-cell *matHeaderCellDef class="pl-0 text-center">No</th>
+							<td mat-cell *matCellDef="let element" class="pl-0 text-center">
+								{{ element ? element.index + 1 : '' }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="userName">
+							<th mat-header-cell *matHeaderCellDef class="username-wrap">用户</th>
+							<td mat-cell *matCellDef="let element" class="username-wrap">
+								{{ element.user.name }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="dustName">
+							<th mat-header-cell *matHeaderCellDef>垃圾名称</th>
+							<td mat-cell *matCellDef="let element">
+								<span [class.green]="element.dustType == 0" [class.accent]="element.dustType == 2">
+									{{ element ? dustName[element.dustType] : '' }}
+								</span>
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="amount">
+							<th mat-header-cell *matHeaderCellDef>重量</th>
+							<td mat-cell *matCellDef="let element">
+								{{ element?.amount | currency: 'USD':'':'1.1-1' }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="picture">
+							<th mat-header-cell *matHeaderCellDef class="text-center">现场照片</th>
+							<td mat-cell *matCellDef="let element" class="text-center">
+								<div class="inline-trashlog-picture">
+									<!-- <img (click)="openPicture(element)" [src]="element?.pictureUrl? 
+                                        serverUrl+'/'+element.pictureUrl : 'assets/img/extra/empty-image.png'" 
+                                        class="transition-2 pointer"> -->
+									<img
+										[defaultImage]="'assets/img/extra/empty-image.png'"
+										[lazyLoad]="serverUrl + '/' + element.pictureUrl"
+										(click)="openPicture(element)"
+									/>
+								</div>
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="calcPoint">
+							<th mat-header-cell *matHeaderCellDef class="text-center">对应积分</th>
+							<td mat-cell *matCellDef="let element" class="text-center">
+								{{ element?.point | currency: 'USD':'':'1.2-2' }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="state">
+							<th mat-header-cell *matHeaderCellDef class="text-center">状态</th>
+							<td mat-cell *matCellDef="let element" class="text-center">
+								<span *ngIf="element?.state == 'PENDING'" fxLayout="row" fxLayoutAlign="center center">
+									<mat-icon color="accent">schedule</mat-icon>
+									<span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;未处理</span>
+								</span>
+								<span *ngIf="element?.state == 'PASS'" fxLayout="row" fxLayoutAlign="center center">
+									<mat-icon color="primary">check_circle_outline</mat-icon>
+									<span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;合格</span>
+								</span>
+								<span *ngIf="element?.state == 'FAIL'" fxLayout="row" fxLayoutAlign="center center">
+									<mat-icon color="warn">highlight_off</mat-icon>
+									<span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;不合格</span>
+								</span>
+								<span *ngIf="element?.state == 'EMPTY'" fxLayout="row" fxLayoutAlign="center center">
+									<mat-icon color="warn">cloud_queue</mat-icon>
+									<span *ngIf="commonService.isMediaActive('gt-xs')">&nbsp;空桶</span>
+								</span>
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="createdAt">
+							<th mat-header-cell *matHeaderCellDef mat-sort-header>创建时间</th>
+							<td mat-cell *matCellDef="let element">
+								{{ element?.createdAt ? (element.createdAt | date: 'yyyy.MM.dd - HH:mm:ss') : '' }}
+							</td>
+						</ng-container>
+						<ng-container matColumnDef="deviceType">
+							<th mat-header-cell *matHeaderCellDef class="pr-0 text-center">自动/手动</th>
+							<td mat-cell *matCellDef="let element" class="pr-0">
+								<mat-chip-list class="center">
+									<mat-chip
+										*ngIf="element.deviceType == 'AUTO'"
+										class="mat-small-chip"
+										color="primary"
+										selected="true"
+									>
+										自动
+									</mat-chip>
+									<mat-chip
+										*ngIf="element.deviceType == 'MANUAL'"
+										class="mat-small-chip"
+										color="accent"
+										selected="true"
+									>
+										手动
+									</mat-chip>
+								</mat-chip-list>
+							</td>
+						</ng-container>
+						<tr mat-header-row *matHeaderRowDef="displayedColumnsTrashLog" class="display-none"></tr>
+						<tr
+							mat-row
+							*matRowDef="let element; columns: displayedColumnsTrashLog"
+							[style.background]="element?.index % 2 ? '#F0F0F0' : ''"
+						></tr>
+					</table>
+				</div>
+			</div>
+
+			<!-- <div class="flex-p" fxFlex>
+                <div class="notify-img pointer" [style.background-image]="'url(assets/img/extra/notification.png)'"
+                    (click)="openClassificationDialog()">
+                </div>
+            </div>             -->
+		</div>
+		<div fxFlex="100" fxFlex.gt-sm="35" fxLayout="column">
+			<div class="flex-p-x">
+				<h4 *ngIf="siteSlogan" class="ads-wrap" [innerHtml]="siteSlogan"></h4>
+				<h4 *ngIf="!siteSlogan" class="ads-wrap" [innerHtml]="siteSlogan">
+					垃圾分类&nbsp;&nbsp;&nbsp;利国利民&nbsp;&nbsp;&nbsp;垃圾分一分&nbsp;&nbsp;&nbsp;环境美十分
+				</h4>
+			</div>
+			<div
+				class="flex-p"
+				[style.height]="commonService.isMediaActive('gt-xs') ? '100%' : '300px'"
+				(click)="$event.stopPropagation(); goToMap()"
+			>
+				<app-map [area]="user.role == 'SUPER' ? 'whole' : 'city'"></app-map>
+			</div>
+			<div fxFlex="100" fxFlex.gt-sm="30" fxLayout="row">
+				<div fxFlex="60" class="flex-p">
+					<video
+						controls
+						autoplay
+						loop
+						#videoPlayer
+						class="video-player pointer"
+						[routerLink]="user.role == 'SUPER' ? '/setting' : '/citysetting'"
+					></video>
+				</div>
+				<div fxFlex="40" class="flex-p pointer" routerLink="/trashlog">
+					<table
+						mat-table
+						[dataSource]="dataSourceReportNull"
+						multiTemplateDataRows
+						class="mat-elevation-z8 w-100 main-box-shadow"
+					>
+						<ng-container matColumnDef="index">
+							<th mat-header-cell *matHeaderCellDef>No</th>
+							<td mat-cell *matCellDef="let element"></td>
+						</ng-container>
+						<ng-container matColumnDef="deviceId">
+							<th mat-header-cell *matHeaderCellDef>设备ID</th>
+							<td mat-cell *matCellDef="let element"></td>
+						</ng-container>
+						<ng-container matColumnDef="city">
+							<th mat-header-cell *matHeaderCellDef>城市</th>
+							<td mat-cell *matCellDef="let element"></td>
+						</ng-container>
+						<ng-container matColumnDef="address">
+							<th mat-header-cell *matHeaderCellDef>详细地址</th>
+							<td mat-cell *matCellDef="let element"></td>
+						</ng-container>
+						<ng-container matColumnDef="state">
+							<th mat-header-cell *matHeaderCellDef>
+								<div fxLayout="row" fxLayoutAlign="center center">状态</div>
+							</th>
+							<td mat-cell *matCellDef="let element"></td>
+						</ng-container>
+						<tr mat-header-row *matHeaderRowDef="displayedColumnsReport; sticky: true"></tr>
+						<tr
+							mat-row
+							*matRowDef="let element; columns: displayedColumnsReport"
+							[style.background]="element?.index % 2 ? '#F0F0F0' : ''"
+						></tr>
+					</table>
+					<div style="height: 200px; overflow: hidden; scroll-behavior: smooth" #trashesTable>
+						<table
+							mat-table
+							[dataSource]="dataSourceReport"
+							multiTemplateDataRows
+							class="mat-elevation-z8 w-100 main-box-shadow"
+						>
+							<ng-container matColumnDef="index">
+								<th mat-header-cell *matHeaderCellDef>No</th>
+								<td mat-cell *matCellDef="let element">
+									{{ element ? element.index + 1 : '' }}
+								</td>
+							</ng-container>
+							<ng-container matColumnDef="deviceId">
+								<th mat-header-cell *matHeaderCellDef>设备ID</th>
+								<td mat-cell *matCellDef="let element">
+									{{ element.deviceId }}
+								</td>
+							</ng-container>
+							<ng-container matColumnDef="city">
+								<th mat-header-cell *matHeaderCellDef>城市</th>
+								<td mat-cell *matCellDef="let element">
+									{{ element?.city ? element.city.name : '' }}
+								</td>
+							</ng-container>
+							<ng-container matColumnDef="address">
+								<th mat-header-cell *matHeaderCellDef>详细地址</th>
+								<td mat-cell *matCellDef="let element">
+									<div fxLayout="row" fxLayoutAlign="center center">
+										{{ element?.address ? element.address.slice(0, 5) : '' }}
+									</div>
+								</td>
+							</ng-container>
+							<ng-container matColumnDef="state">
+								<th mat-header-cell *matHeaderCellDef>
+									<div fxLayout="row" fxLayoutAlign="center center">状态</div>
+								</th>
+								<td mat-cell *matCellDef="let element">
+									<div *ngIf="element" fxLayout="row" fxLayoutAlign="center center">
+										<mat-icon color="{{ element.online ? 'primary' : 'warn' }}">
+											{{ element.online ? 'wifi' : 'wifi_off' }}
+										</mat-icon>
+									</div>
+								</td>
+							</ng-container>
+							<tr mat-header-row *matHeaderRowDef="displayedColumnsReport" class="display-none"></tr>
+							<tr
+								mat-row
+								*matRowDef="let element; columns: displayedColumnsReport"
+								[style.background]="element?.index % 2 ? '#F0F0F0' : ''"
+							></tr>
+						</table>
+					</div>
+					<!-- <mat-paginator class="display-none" #paginatorReport [pageSize]="trashPageSize" [length]="totalCntReport" [pageIndex]="pageIndexReport"
+                        (page)="getTrashesReport($event)">
+                    </mat-paginator> -->
+				</div>
+			</div>
+		</div>
+		<div fxFlex="100" fxFlex.gt-sm="30" fxLayout="column" class="h-100">
+			<div class="flex-p" fxFlex="35">
+				<mat-card
+					class="main-box-shadow chart-card pointer"
+					[routerLink]="user.role == 'SUPER' ? '/report/cities/month' : '/report/city/month'"
+				>
+					<mat-card-header fxLayoutAlign="center center">
+						<mat-card-subtitle><h2>分类垃圾投放月报表</h2></mat-card-subtitle>
+						<ng-container *ngTemplateOutlet="legend"></ng-container>
+					</mat-card-header>
+					<div class="chart-wrap">
+						<ngx-charts-line-chart
+							[scheme]="colorScheme"
+							[results]="monthReport"
+							[gradient]="gradient"
+							[xAxis]="showXAxis"
+							[yAxis]="showYAxis"
+							[legend]="showLegend"
+							[showXAxisLabel]="showXAxisLabel"
+							[showYAxisLabel]="showYAxisLabel"
+							[xAxisLabel]="xAxisLabel"
+							[yAxisLabel]="yAxisLabel"
+							[legendTitle]="legendTitle"
+							[legendPosition]="legendPosition"
+						>
+						</ngx-charts-line-chart>
+						<!-- <ngx-charts-bar-vertical-2d
+                                [scheme]="colorScheme"
+                                [results]="monthReport"
+                                [gradient]="gradient"
+                                [xAxis]="showXAxis"
+                                [yAxis]="showYAxis"
+                                [legend]="showLegend"
+                                [showXAxisLabel]="showXAxisLabel"
+                                [showYAxisLabel]="showYAxisLabel"
+                                [xAxisLabel]="xAxisLabel"
+                                [yAxisLabel]="yAxisLabel"
+                                [barPadding]="barPadding"
+                                [groupPadding]="groupPadding"
+                                [legendTitle]="legendTitle"
+                                [legendPosition]="legendPosition">
+                        </ngx-charts-bar-vertical-2d>    -->
+					</div>
+				</mat-card>
+			</div>
+
+			<!-- <div class="flex-p trash-img-wrap pointer" fxFlex="30" fxLayout="row"
+                    (click)="openClassificationDialog()">
+                <div fxFlex="50" class="trash-img" [style.background-image]="'url(assets/img/extra/trash_1.png)'"></div>
+                <div fxFlex="50" class="trash-img" [style.background-image]="'url(assets/img/extra/trash_2.png)'"></div>
+            </div> -->
+
+			<div class="flex-p" fxFlex="30">
+				<mat-card class="main-box-shadow h-100 p-0 pointer" routerLink="/report/city">
+					<div *ngIf="datePointResult" fxLayout="row" fxLayoutAlign="start" class="h-100 p-1">
+						<div fxFlex="20" fxLayout="column" fxLayoutAlign="start">
+							<div fxLayout="row" fxLayoutAlign="start center" class="user-report-wrap">
+								<span fxFlex="70" class="muted-text">总户数:</span>
+								<span fxFlex="30" class="accent">{{ totalUserCnt ? totalUserCnt : 0 }}</span>
+							</div>
+							<div fxLayout="row" fxLayoutAlign="start center" class="user-report-wrap">
+								<span fxFlex="70" class="muted-text">常住户数:</span>
+								<span fxFlex="30" class="accent">{{ resident ? resident : 0 }}</span>
+							</div>
+							<!-- <div *ngFor="let dust of dustName; let idx = index;" fxLayout="row" fxLayoutAlign="start center" class="user-report-wrap">
+                                <span fxFlex="70" class="muted-text">{{dust? dust : '垃圾' + idx}}数:</span>
+                                <span fxFlex="30" class="accent">{{datePointResult.dustUserCnt[idx]? datePointResult.dustUserCnt[idx] : 0}}</span>
+                            </div> -->
+						</div>
+						<div fxFlex fxLayout="column">
+							<div *ngFor="let dust of dustName; let idx = index" fxFlex="50" fxLayout="row wrap">
+								<div
+									fxFlex="25"
+									fxLayout="row"
+									fxLayoutAlign="space-between center"
+									class="muted-text p-025 pointer"
+									routerLink="/report/city"
+								>
+									<div fxLayout="column" fxLayoutAlign="center center">
+										<h4>
+											{{
+												datePointResult.dustUserCnt[idx] ? datePointResult.dustUserCnt[idx] : 0
+											}}
+										</h4>
+										<h6>{{ dust ? dust : '垃圾' + idx }}数</h6>
+									</div>
+								</div>
+								<div
+									fxFlex="25"
+									fxLayout="row"
+									fxLayoutAlign="space-between center"
+									class="muted-text p-025 pointer"
+									routerLink="/trashlog"
+								>
+									<mat-icon color="accent">assignment_turned_in</mat-icon>
+									<div fxLayout="column" fxLayoutAlign="center center">
+										<h4>
+											{{
+												datePointResult.dustTotalCnt[idx]
+													? ((datePointResult.dustPassedCnt[idx] * 100) /
+															datePointResult.dustTotalCnt[idx]
+													  | currency: 'USD':'':'1.0-0')
+													: 100
+											}}%
+										</h4>
+										<h6>正确率</h6>
+									</div>
+								</div>
+								<div
+									fxFlex="25"
+									fxLayout="row"
+									fxLayoutAlign="space-between center"
+									class="muted-text p-025 pointer"
+									routerLink="/report/user"
+								>
+									<mat-icon color="warn">assignment_ind</mat-icon>
+									<div fxLayout="column" fxLayoutAlign="center center">
+										<h4>
+											{{
+												totalUserCnt
+													? ((datePointResult.dustUserCnt[idx] * 100) / totalUserCnt
+													  | currency: 'USD':'':'1.0-0')
+													: 100
+											}}%
+										</h4>
+										<h6>参与率</h6>
+									</div>
+								</div>
+								<div
+									fxFlex="25"
+									fxLayout="row"
+									fxLayoutAlign="space-between center"
+									class="muted-text p-025 pointer"
+									[routerLink]="user.role == 'SUPER' ? '/report/cities' : '/report/city'"
+								>
+									<mat-icon color="primary">assignment</mat-icon>
+									<div fxLayout="column" fxLayoutAlign="center center">
+										<h4>
+											{{ datePointResult.dustAmount[idx] | currency: 'USD':'':'1.0-0' }}
+										</h4>
+										<h6>重量(kg)</h6>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</mat-card>
+			</div>
+
+			<div class="flex-p" fxFlex="35">
+				<mat-card
+					class="main-box-shadow chart-card pointer"
+					[routerLink]="user.role == 'SUPER' ? '/report/cities/year' : '/report/city/year'"
+				>
+					<mat-card-header fxLayoutAlign="center center">
+						<mat-card-subtitle><h2>分类垃圾投放年报表</h2></mat-card-subtitle>
+						<ng-container *ngTemplateOutlet="legend"></ng-container>
+					</mat-card-header>
+					<div class="chart-wrap">
+						<ngx-charts-line-chart
+							[scheme]="colorScheme"
+							[results]="yearReport"
+							[gradient]="gradient"
+							[xAxis]="showXAxis"
+							[yAxis]="showYAxis"
+							[legend]="showLegend"
+							[showXAxisLabel]="showXAxisLabel"
+							[showYAxisLabel]="showYAxisLabel"
+							[xAxisLabel]="xAxisLabel"
+							[yAxisLabel]="yAxisLabel"
+							[legendTitle]="legendTitle"
+							[legendPosition]="legendPosition"
+						>
+						</ngx-charts-line-chart>
+						<!-- <ngx-charts-bar-vertical-2d
+                                [scheme]="colorScheme"
+                                [results]="yearReport"
+                                [gradient]="gradient"
+                                [xAxis]="showXAxis"
+                                [yAxis]="showYAxis"
+                                [legend]="showLegend"
+                                [showXAxisLabel]="showXAxisLabel"
+                                [showYAxisLabel]="showYAxisLabel"
+                                [xAxisLabel]="xAxisLabel"
+                                [yAxisLabel]="yAxisLabel"
+                                [barPadding]="barPadding"
+                                [groupPadding]="groupPadding"
+                                [legendTitle]="legendTitle"
+                                [legendPosition]="legendPosition"
+                                [showDataLabel]="true">
+                        </ngx-charts-bar-vertical-2d>               -->
+					</div>
+				</mat-card>
+			</div>
+		</div>
+	</div>
+</div>
+
+<ng-template #legend>
+	<div class="custom-legend-wrap">
+		<span class="legend-title-text">垃圾分类标识图例</span>
+		<ul class="custom-legend-labels">
+			<li *ngFor="let dust of dustName; let i = index">
+				<span class="custom-legend-label-color" [style.background-color]="colorScheme.domain[i]"></span>
+				<span class="custom-legend-label-text"> {{ dust ? dust : '垃圾1' }}(公斤) </span>
+			</li>
+		</ul>
+	</div>
+</ng-template>

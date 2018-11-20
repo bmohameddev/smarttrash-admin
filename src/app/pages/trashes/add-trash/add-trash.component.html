@@ -1,0 +1,101 @@
+<form [formGroup]="form" (ngSubmit)="submitForm()" autocomplete="off" novalidate>
+    <div class="p-1" fxLayoutAlign="space-between center">
+        <h1 mat-dialog-title class="m-0">{{trash? '编辑' : '添加'}}设备</h1>
+        <button mat-icon-button mat-dialog-close tabindex="-1">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <div fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutAlign="space-between space-between"
+            class="form-field-outer">
+            <mat-form-field fxFlex="100">
+                <input matInput formControlName="deviceId" placeholder="设备ID">
+                <mat-error *ngIf="form.controls.deviceId.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field class="w-100">
+                <input matInput type="text" formControlName="city" [matAutocomplete]="autoCity" placeholder="城市">
+                <mat-autocomplete (keydown.enter)="$event.stopPropagation()"
+                    #autoCity="matAutocomplete">
+                    <mat-option *ngFor="let city of autocompleteCities" [value]="city"> {{ city }} </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field fxFlex="100">
+                <input matInput formControlName="address" placeholder="地址">
+            </mat-form-field>
+            <mat-form-field class="w-100" *ngIf="commonData.city.topAdmin == user.id || user.role == 'SUPER'">
+                <mat-label> 管理员 </mat-label>
+                <mat-chip-list #chipList>
+                    <mat-chip *ngFor="let admin of admins; let i = index;" [selectable]="true" [removable]="true">
+                        {{ admin }}
+                        <mat-icon matChipRemove (click)="removeAdmin(i)"> cancel </mat-icon>
+                    </mat-chip>
+                    <input matInput type="text" formControlName="admin" [matChipInputFor]="chipList" #inputForAdmin
+                        [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="false"
+                        (matChipInputTokenEnd)="addAdmin()" [matAutocomplete]="autoAdmin">
+                    <mat-autocomplete (optionSelected)="addAdmin();" (keydown.enter)="$event.stopPropagation()"
+                        #autoAdmin="matAutocomplete">
+                        <mat-option *ngFor="let admin of autocompleteAdmins" [value]="admin.name"> {{ admin.name }} </mat-option>
+                    </mat-autocomplete>
+                </mat-chip-list>
+            </mat-form-field>
+            <!-- <div class="w-100" fxLayout="column">
+                <small>音量(%)</small>
+                <mat-slider class="custom-slider"
+                    [disabled]="false"
+                    [invert]="false"
+                    [max]="100"
+                    [min]="0"
+                    [step]="1"
+                    [thumbLabel]="true"
+                    [tickInterval]="1"
+                    [(ngModel)]="volume"
+                    [ngModelOptions]="{standalone: true}"
+                    [vertical]="false">
+                </mat-slider>
+            </div> -->
+            <mat-form-field fxFlex="25">
+                <mat-label> 电压(V) </mat-label>
+                <mat-select formControlName="voltageType">
+                    <mat-option  value="DC12"> 12 </mat-option>
+                    <mat-option  value="DC24"> 24 </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form.controls.voltageType.errors?.required">
+                    必须填写
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="25">
+                <input matInput formControlName="levelLimit" placeholder="水位极限(mm)">
+                <mat-error *ngIf="form.controls.levelLimit.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="25">
+                <input matInput formControlName="trashHeight" placeholder="垃圾桶高度(mm)">
+                <mat-error *ngIf="form.controls.trashHeight.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="25">
+                <input matInput formControlName="trashMargin" placeholder="垃圾桶余量(mm)">
+                <mat-error *ngIf="form.controls.trashMargin.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="25">
+                <input matInput formControlName="dust1Name" placeholder="垃圾名称1">
+                <mat-error *ngIf="form.controls.dust1Name.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="25">
+                <input matInput formControlName="dust2Name" placeholder="垃圾名称2">
+                <mat-error *ngIf="form.controls.dust2Name.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="25">
+                <input matInput formControlName="dust3Name" placeholder="垃圾名称3">
+                <mat-error *ngIf="form.controls.dust3Name.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+            <mat-form-field fxFlex="25">
+                <input matInput formControlName="dust4Name" placeholder="垃圾名称4">
+                <mat-error *ngIf="form.controls.dust4Name.errors?.required"> 必须填写 </mat-error>
+            </mat-form-field>
+        </div>
+    </div>
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+        <button mat-raised-button color="primary" [disabled]="form.invalid || submitted" type="submit">
+            <span> 保存 </span>
+        </button>
+    </div>
+</form>

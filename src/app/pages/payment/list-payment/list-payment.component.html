@@ -1,0 +1,107 @@
+<div fxLayout="column">
+	<div class="flex-p">
+		<div fxLayout="row" fxLayoutAlign="space-between center" class="w-100">
+			<form
+				[formGroup]="searchForm"
+				fxFlex
+				fxLayout="row"
+				fxLayoutAlign="start
+				center"
+			>
+				<div fxLayout="row">
+					<div class="flex-p" *ngFor="let dust of dusts">
+						<mat-checkbox
+							[(ngModel)]="dust.selected"
+							[ngModelOptions]="{ standalone: true }"
+							(change)="applySearch()"
+						>
+							{{ dust.name }}
+						</mat-checkbox>
+					</div>
+				</div>
+				<div *ngIf="user && user.id == commonData?.city?.topAdmin" class="flex-p">
+					<button mat-stroked-button color="primary" (click)="openAddDialog()">兑换总积分</button>
+				</div>
+			</form>
+			<div *ngIf="commonData.city.topAdmin == user.id" fxLayout="row" fxLayoutAlign="start center">
+				<button mat-stroked-button color="primary" class="mr-025" (click)="export('xlsx')">导 出</button>
+				<button mat-stroked-button color="primary" (click)="print()">打 印</button>
+			</div>
+		</div>
+
+		<table
+			mat-table
+			[dataSource]="dataSource"
+			matSort
+			multiTemplateDataRows
+			class="mat-elevation-z8 w-100"
+			(matSortChange)="customSort($event)"
+		>
+			<ng-container matColumnDef="index">
+				<th mat-header-cell *matHeaderCellDef>No</th>
+				<td mat-cell *matCellDef="let element">{{ element.index + 1 }}</td>
+			</ng-container>
+			<ng-container matColumnDef="dustType">
+				<th mat-header-cell *matHeaderCellDef>垃圾分类</th>
+				<td mat-cell *matCellDef="let element">{{ dusts[element.dustType].name }}</td>
+			</ng-container>
+			<ng-container matColumnDef="startDate">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header>开始日期</th>
+				<td mat-cell *matCellDef="let element">
+					{{ (element.startDate ? element.startDate : '') | date: 'yy.MM.dd' }}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="endDate">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header>结束日期</th>
+				<td mat-cell *matCellDef="let element">
+					{{ (element.endDate ? element.endDate : '') | date: 'yy.MM.dd' }}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="operator">
+				<th mat-header-cell *matHeaderCellDef>管理员</th>
+				<td mat-cell *matCellDef="let element">{{ element.operator.name }}</td>
+			</ng-container>
+			<ng-container matColumnDef="totalPoint">
+				<th mat-header-cell *matHeaderCellDef>总积分</th>
+				<td mat-cell *matCellDef="let element">
+					{{ element.totalPoint | currency: 'USD':'':'1.1-2' }}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="paymentPoint">
+				<th mat-header-cell *matHeaderCellDef>兑换积分</th>
+				<td mat-cell *matCellDef="let element">
+					{{ element.paymentPoint | currency: 'USD':'':'1.1-2' }}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="paymentMoney">
+				<th mat-header-cell *matHeaderCellDef>兑换钱</th>
+				<td mat-cell *matCellDef="let element">
+					{{ element.paymentMoney | currency: 'USD':'':'1.1-2' }}
+				</td>
+			</ng-container>
+			<ng-container matColumnDef="createdAt">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header>兑换日期</th>
+				<td mat-cell *matCellDef="let element">
+					{{ (element.createdAt ? element.createdAt : '') | date: 'yy.MM.dd-HH:mm:ss' }}
+				</td>
+			</ng-container>
+			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+			<tr
+				mat-row
+				*matRowDef="let element; columns: displayedColumns"
+				class="example-element-row"
+				[style.background]="element.index % 2 ? '#F0F0F0' : ''"
+			></tr>
+		</table>
+		<mat-paginator
+			#paginator
+			[pageSize]="10"
+			[length]="totalCnt"
+			[pageIndex]="pageIndex"
+			[pageSizeOptions]="[10, 20, 50, 100]"
+			[showFirstLastButtons]="true"
+			(page)="getData($event)"
+		>
+		</mat-paginator>
+	</div>
+</div>

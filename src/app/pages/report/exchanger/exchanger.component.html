@@ -1,0 +1,116 @@
+<div fxLayout="column">
+	<div fxLayout="row" fxLayoutAlign="space-between center" class="w-100">
+		<form [formGroup]="searchForm" fxFlex fxLayout="row" fxLayoutAlign="start center" class="flex-p">
+			<div fxLayout="row">
+				<mat-form-field class="custom-form-field pb0-form-filed mr-05 w-160p" appearance="outline">
+					<mat-label> 开始日期 </mat-label>
+					<input
+						matInput
+						[matDatepicker]="startDate"
+						formControlName="startDate"
+						(dateChange)="applySearch()"
+					/>
+					<mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+					<mat-datepicker #startDate></mat-datepicker>
+				</mat-form-field>
+				<mat-form-field class="custom-form-field pb0-form-filed mr-05 w-160p" appearance="outline">
+					<mat-label> 结束日期 </mat-label>
+					<input matInput [matDatepicker]="endDate" formControlName="endDate" (dateChange)="applySearch()" />
+					<mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+					<mat-datepicker #endDate></mat-datepicker>
+				</mat-form-field>
+			</div>
+		</form>
+	</div>
+
+	<div class="mx-05">
+		<mat-card class="main-box-shadow">
+			<div *ngIf="pointResult" fxFlex fxLayout="column" class="p-0">
+				<div *ngFor="let dust of dustName; let idx = index" fxLayout="row wrap" class="p-1">
+					<h4 fxFlex="100" class="muted-text text-center">{{ dust ? dust : '垃圾' + idx }}</h4>
+					<div fxFlex="16.6" fxLayout="row" fxLayoutAlign="space-around center" class="muted-text p-1">
+						<mat-icon color="primary" class="icon-lg">assignment</mat-icon>
+						<div fxLayout="column" fxLayoutAlign="center center">
+							<h3>{{ pointResult.dustAmount[idx] | currency: 'USD':'':'1.1-1' }}</h3>
+							<h6>重量(kg)</h6>
+						</div>
+					</div>
+					<div fxFlex="16.6" fxLayout="row" fxLayoutAlign="space-around center" class="muted-text p-1">
+						<mat-icon color="accent" class="icon-lg">pending</mat-icon>
+						<div fxLayout="column" fxLayoutAlign="center center">
+							<h3>{{ pointResult.dustPoint[idx] | currency: 'USD':'':'1.0-1' }}</h3>
+							<h6>积分</h6>
+						</div>
+					</div>
+					<div fxFlex="16.6" fxLayout="row" fxLayoutAlign="space-around center" class="muted-text p-1">
+						<mat-icon color="primary" class="icon-lg">payment</mat-icon>
+						<div fxLayout="column" fxLayoutAlign="center center">
+							<h3>{{ pointResult.paymentPoint[idx] | currency: 'USD':'':'1.0-1' }}</h3>
+							<h6>积分兑换（管理员）</h6>
+						</div>
+					</div>
+					<div fxFlex="16.6" fxLayout="row" fxLayoutAlign="space-around center" class="muted-text p-1">
+						<mat-icon color="warn" class="icon-lg">cloud_queue</mat-icon>
+						<div fxLayout="column" fxLayoutAlign="center center">
+							<h3>
+								{{
+									pointResult.dustPoint[idx] - pointResult.paymentPoint[idx]
+										| currency: 'USD':'':'1.0-1'
+								}}
+							</h3>
+							<h6>剩余积分（管理员）</h6>
+						</div>
+					</div>
+					<div fxFlex="16.6" fxLayout="row" fxLayoutAlign="space-around center" class="muted-text p-1">
+						<mat-icon color="primary" class="icon-lg">payment</mat-icon>
+						<div fxLayout="column" fxLayoutAlign="center center">
+							<h3>{{ pointResult.withdrawPoint[idx] | currency: 'USD':'':'1.0-1' }}</h3>
+							<h6>积分兑换（居民）</h6>
+						</div>
+					</div>
+					<div fxFlex="16.6" fxLayout="row" fxLayoutAlign="space-around center" class="muted-text p-1">
+						<mat-icon color="warn" class="icon-lg">cloud_queue</mat-icon>
+						<div fxLayout="column" fxLayoutAlign="center center">
+							<h3>
+								{{
+									pointResult.dustPoint[idx] - pointResult.withdrawPoint[idx]
+										| currency: 'USD':'':'1.0-1'
+								}}
+							</h3>
+							<h6>剩余积分（居民）</h6>
+						</div>
+					</div>
+				</div>
+				<div fxLayout="row wrap" fxLayoutAlign="center" class="p-1">
+					<div fxLayout="column" fxLayoutAlign="center center" class="p-1">
+						<h2>总积分: {{ pointResult.totalPoint | currency: 'USD':'':'1.0-1' }}</h2>
+					</div>
+					<div fxLayout="column" fxLayoutAlign="center center" class="p-1">
+						<h2>
+							总积分兑换（管理员）:
+							{{ pointResult.totalPaymentPoint | currency: 'USD':'':'1.0-1' }}
+						</h2>
+					</div>
+					<div fxLayout="column" fxLayoutAlign="center center" class="p-1">
+						<h2>
+							总剩余积分（管理员）:
+							{{ pointResult.totalPoint - pointResult.totalPaymentPoint | currency: 'USD':'':'1.0-1' }}
+						</h2>
+					</div>
+					<div fxLayout="column" fxLayoutAlign="center center" class="p-1">
+						<h2>
+							总积分兑换（居民）:
+							{{ pointResult.totalWithdrawPoint | currency: 'USD':'':'1.0-1' }}
+						</h2>
+					</div>
+					<div fxLayout="column" fxLayoutAlign="center center" class="p-1">
+						<h2>
+							总剩余积分（居民）:
+							{{ pointResult.totalPoint - pointResult.totalWithdrawPoint | currency: 'USD':'':'1.0-1' }}
+						</h2>
+					</div>
+				</div>
+			</div>
+		</mat-card>
+	</div>
+</div>

@@ -1,0 +1,23 @@
+.messages{
+    width: 300px;
+    .mat-tab-label{
+        min-width: 93.3px;
+        height: 40px;
+    }
+
+    .content {
+        span {
+            font-size: 16px;
+        }
+    }
+}
+
+.notification-active {
+    width: 10px;
+    height: 10px;
+    border-radius: 12px;
+    background-color: #FF0000cc;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+}
